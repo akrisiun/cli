@@ -306,3 +306,7 @@ launchSettings.json
 !TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/TestLibrary.xproj.user
 !TestAssets/TestProjects/TestAppWithLibrary/TestApp/TestApp.xproj.user
 !TestAssets/TestProjects/PJTestAppSimple/PJTestAppSimple.xproj.user
+
+lib/dotnet/
+lib/lib.zip
+lib/sdk/

@@ -29,6 +29,8 @@ namespace Microsoft.DotNet.Cli
 
         public static int Main(string[] args)
         {
+            // Console.WriteLine("Waiting debugger");
+            // DebugHelper.WaitForDebugger();
             DebugHelper.HandleDebugSwitch(ref args);
 
             new MulticoreJitActivator().TryActivateMulticoreJit();
@@ -300,7 +302,7 @@ namespace Microsoft.DotNet.Cli
         {
             DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
             var commitSha = versionFile.CommitSha ?? "N/A";
-            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetSdkInfoLabel}");
+            Reporter.Output.WriteLine($"DOT debug </> {LocalizableStrings.DotNetSdkInfoLabel}");
             Reporter.Output.WriteLine($" Version:   {Product.Version}");
             Reporter.Output.WriteLine($" Commit:    {commitSha}");
             Reporter.Output.WriteLine();

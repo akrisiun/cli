@@ -45,7 +45,10 @@ $ErrorActionPreference = "Stop"
 
 function Create-Directory([string[]] $path) {
   if (!(Test-Path $path)) {
-    New-Item -path $path -force -itemType "Directory" | Out-Null
+    write-host New-Item -path $path -force
+    # New-Item -path $path -force -itemType "Directory" | Out-Null
+    $path = "$pwd\lib"
+    write-host $path
   }
 }
 

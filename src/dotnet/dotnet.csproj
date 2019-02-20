@@ -12,6 +12,10 @@
     <PackageId>Microsoft.DotNet.Cli</PackageId>
     <UseAppHost>false</UseAppHost>
     <IsPackable>true</IsPackable>
+    
+    <LibDir>d:\Beta\dotnet\dotnet-cli\lib\</LibDir>
+    <DotNetDir>d:\Beta\dotnet\dotnet-cli\.dotnet</DotNetDir>
+    <StartupObject>Microsoft.DotNet.Cli.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -81,4 +85,18 @@
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
   </ItemGroup>
+  <Target Name="CoreBuild">
+    <Message Importance="High" Text="CoreBuild: src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
+  </Target>
+  <Target Name="PreBuildTask">
+    <Message Importance="High" Text="PreBuildTask: src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
+  </Target>
+  <Target Name="PostBuildTask" AfterTargets="Build">
+  </Target>
+  <Target Name="ExecBuild">  
+    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
+    <Exec Command="$(DotNetDir)\dotnet.exe build -o $(LibDir) -c Debug --no-restore" />
+    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
+    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).pdb" DestinationFiles="$(LibDir)\$(TargetName).pdb" SkipUnchangedFiles="false" />
+  </Target>
 </Project>

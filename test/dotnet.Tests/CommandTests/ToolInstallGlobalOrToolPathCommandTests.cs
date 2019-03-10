@@ -22,6 +22,126 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
+using NuGet.Versioning;
+
+namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
+{
+    // WTF, where is Mocks
+
+    public class MockFeedType {
+        public static Type ImplicitAdditionalFeed { get; set; }
+        public static Type FeedFromGlobalNugetConfig { get; set; }
+        public static Type FeedFromLookUpNugetConfig { get; set; }
+    }
+
+    public class MockFeedPackage {
+
+        public object PackageId  { get; set; }
+        public object Version  { get; set; }
+        public object ToolCommandName  { get; set; }
+    }
+    
+    public class MockFeed
+    {
+        public Type Type { get; set; }
+        public string Uri { get; set; }
+        public List<MockFeedPackage> Packages { get; set; }
+    }
+
+    public class EnvironmentPathInstructionMock : IEnvironmentPathInstruction 
+    {
+        public EnvironmentPathInstructionMock(params object[] args) { }
+        public void PrintAddPathInstructionIfPathDoesNotExist() { }
+
+        public static string MockInstructionText { get; set; }
+    }
+
+    internal class ProjectRestorerMock { 
+        public ProjectRestorerMock(
+            IFileSystem fileSystem,
+            object reporter = null,
+            object feeds = null,
+            params object[] args) { }
+
+        public IFileSystem fileSystem { get; set; }
+
+        public static string DefaultToolCommandName { get; set; } = "restore";
+    }
+
+    public class AppHostShellShimMakerMock : IAppHostShellShimMaker
+    {
+        public AppHostShellShimMakerMock(params object[] args)
+        {
+        }
+
+        public FakeShim Fake { get; set; }
+    
+        public class FakeShim {
+            public string ExecutablePath { get; set; }
+        }
+
+        public void CreateApphostShellShim(FilePath entryPoint, FilePath shimPath)
+             => throw new NotImplementedException();
+    }
+
+    internal class ToolPackageUninstallerMock : IToolPackageUninstaller
+    {
+        public ToolPackageUninstallerMock(params object[] args) { }
+
+        public void Uninstall(DirectoryPath packageDirectory) { }
+    }
+
+    internal class ToolPackageInstallerMock : IToolPackageInstaller
+    {
+
+        internal ToolPackageInstallerMock(
+            IFileSystem fileSystem,
+            IToolPackageStore store,
+            ProjectRestorerMock projectRestorer,
+            object warningsMap = null,
+            Action installCallback = null,
+            object packagedShimsMap = null,
+            params object[] args)
+        {
+        }
+
+        IToolPackage IToolPackageInstaller.InstallPackage(PackageLocation packageLocation, PackageId packageId,
+            VersionRange versionRange,
+            string targetFramework,
+            string verbosity) => throw new NotImplementedException();
+
+        IToolPackage IToolPackageInstaller.InstallPackageToExternalManagedLocation(PackageLocation packageLocation, PackageId packageId,
+            VersionRange versionRange,
+            string targetFramework,
+            string verbosity) => throw new NotImplementedException();
+
+        public IFileSystem FileSystem { get; set; }
+    }
+    public class ToolPackageStoreMock : IToolPackageStoreQuery, IToolPackageStore
+    {
+        public ToolPackageStoreMock(params object[] args)
+        {
+        }
+
+        public DirectoryPath Root { get; }
+
+        public DirectoryPath GetRandomStagingDirectory() => throw new NotImplementedException();
+
+        NuGetVersion IToolPackageStore.GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId) => throw new NotImplementedException();
+
+        DirectoryPath IToolPackageStore.GetRootPackageDirectory(PackageId packageId) => throw new NotImplementedException();
+
+        DirectoryPath IToolPackageStore.GetPackageDirectory(PackageId packageId, NuGetVersion version) => throw new NotImplementedException();
+
+        IEnumerable<IToolPackage> IToolPackageStoreQuery.EnumeratePackages() => throw new NotImplementedException();
+
+        IEnumerable<IToolPackage> IToolPackageStoreQuery.EnumeratePackageVersions(PackageId packageId) => throw new NotImplementedException();
+
+        IToolPackage IToolPackageStoreQuery.GetPackage(PackageId packageId, NuGetVersion version) 
+            => throw new NotImplementedException();
+    }
+     
+}
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -51,8 +171,8 @@ namespace Microsoft.DotNet.Tests.Commands
             _pathToPlaceShim = Path.Combine(_temporaryDirectory, "pathToPlace");
             _fileSystem.Directory.CreateDirectory(_pathToPlaceShim);
             _pathToPlacePackages = _pathToPlaceShim + "Packages";
-            var toolPackageStoreMock = new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
-            _toolPackageStore = toolPackageStoreMock;
+            IToolPackageStoreQuery toolPackageStoreMock = new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
+            _toolPackageStore = toolPackageStoreMock as IToolPackageStore;
             _toolPackageStoreQuery = toolPackageStoreMock;
             _createShellShimRepository =
                 (nonGlobalLocation) => new ShellShimRepository(
@@ -77,7 +197,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 _parseResult,
                 _createToolPackageStoreAndInstaller,
                 _createShellShimRepository,
-                _environmentPathInstructionMock,
+                _environmentPathInstructionMock as IEnvironmentPathInstruction,
                 _reporter);
 
             toolInstallGlobalOrToolPathCommand.Execute().Should().Be(0);
@@ -191,7 +311,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var toolInstallGlobalOrToolPathCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
-                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
+                null, // (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
                 _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
@@ -468,7 +588,8 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var installCommand = new ToolInstallGlobalOrToolPathCommand(appliedCommand,
                 parseResult,
-                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, new ToolPackageInstallerMock(
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery,
+                new ToolPackageInstallerMock(
                     fileSystem: _fileSystem,
                     store: _toolPackageStore,
                     packagedShimsMap: packagedShimsMap,

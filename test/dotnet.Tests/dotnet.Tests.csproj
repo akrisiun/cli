@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <!--<TargetFramework>$(CliTargetFramework)</TargetFramework>-->
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>dotnet.Tests</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
@@ -23,9 +25,7 @@
     </Content>
   </ItemGroup>
   
-  <Target Name="WriteExpectedVersion"
-          BeforeTargets="BeforeBuild"
-          DependsOnTargets="PrepareForBuild">
+  <Target Name="WriteExpectedVersion" BeforeTargets="BeforeBuild" DependsOnTargets="PrepareForBuild">
 
     <PropertyGroup>
       <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
@@ -36,14 +36,10 @@
       </ExistingVersionFileContent>
 
       <ShouldOverwriteVersionFile>false</ShouldOverwriteVersionFile>
-      <ShouldOverwriteVersionFile
-        Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
+      <ShouldOverwriteVersionFile Condition=" '$(ExistingVersionFileContent.Trim())' != '$(VersionFileContent.Trim())' ">true</ShouldOverwriteVersionFile>
     </PropertyGroup>
     
-    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)"
-                      Lines="$(VersionFileContent)"
-                      Condition=" '$(ShouldOverwriteVersionFile)' == 'true' "
-                      Overwrite="true" />
+    <WriteLinesToFile File="$(ExpectedVersionFileInIntermediateFolder)" Lines="$(VersionFileContent)" Condition=" '$(ShouldOverwriteVersionFile)' == 'true' " Overwrite="true" />
 
     <ItemGroup>
       <Content Include="$(ExpectedVersionFileInIntermediateFolder)" CopyToOutputDirectory="PreserveNewest" />
@@ -70,7 +66,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
-    <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.ComponentMocks\Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj" />
     <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Sln.Internal\Microsoft.DotNet.Cli.Sln.Internal.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />

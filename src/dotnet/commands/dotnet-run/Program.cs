@@ -33,5 +33,14 @@ namespace Microsoft.DotNet.Tools.Run
 
             return FromArgs(args).Execute();
         }
+
+        public static int Exec(string[] args)
+        {
+            DebugHelper.HandleDebugSwitch(ref args);
+
+            var exe = FromArgs(args);
+            var ret = exe.Execute();
+            return ret;
+        }
     }
 }

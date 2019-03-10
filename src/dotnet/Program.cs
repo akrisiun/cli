@@ -20,6 +20,7 @@ using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 using Microsoft.DotNet.CommandFactory;
+using System.Reflection;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -87,7 +88,27 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
+            if (CommandContext.IsVerbose())
+            {
+                ProcessDomain();
+            }
+
             return ret;
+        }
+
+        public static void ProcessDomain()
+        {
+            var domain = AppDomain.CurrentDomain;
+            var asm = domain.GetAssemblies();
+            var list = asm.Where((a) => !a.IsDynamic).OrderBy((a) => a.FullName);
+
+            var dotAsm = typeof(Program).Assembly;
+            Console.Write($"{domain.BaseDirectory} : {dotAsm.FullName} - exe {dotAsm.Location}");
+
+            foreach (Assembly a in list) {
+                Console.Write($"{a.FullName} | {a.Location}");
+            }
+            Console.ResetColor();
         }
 
         internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)

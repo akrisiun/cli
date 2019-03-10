@@ -9,6 +9,9 @@
     <PackageId>Microsoft.DotNet.Cli.Runtime</PackageId>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <IsPackable>true</IsPackable>
+
+    <!--<TargetFramework>netcoreapp3.0</TargetFramework>-->
+
   </PropertyGroup>
 
   <ItemGroup>

@@ -13,14 +13,22 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-preview-010046</DotNetCoreSdkLKGVersion>
+    
     <MicrosoftAspNetCoreAllPackageVersion>2.2.1</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.2.1</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>16.0.0-preview.360</MicrosoftBuildPackageVersion>
+    
+    <!--<MicrosoftBuildPackageVersion>16.0.0-preview.360</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.0.453</MicrosoftBuildPackageVersion>
+    15.7.177
+    -->
+    <MicrosoftBuildPackageVersion>15.7.177</MicrosoftBuildPackageVersion>
+
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
+    
     <MicrosoftNETSdkPackageVersion>3.0.100-preview.19104.2</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10062</MicrosoftNETSdkRazorPackageVersion>

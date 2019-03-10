@@ -2,13 +2,22 @@
   <!--ToolsVersion="15.0"-->
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
+    <!--<TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>-->
+    <TargetFrameworks>netcoreapp2.1;net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <IsPackable>true</IsPackable>
+
+    <MicrosoftBuildPackageVersion>16.0.452</MicrosoftBuildPackageVersion>
+    <DisableWarnForInvalidRestoreProjects>true</DisableWarnForInvalidRestoreProjects>
+    <!-- 3.0.100-preview4-010386\NuGet.targets(266,5): 
+         error MSB4062: The "NuGet.Build.Tasks.WarnForInvalidProjectsTask"
+         Could not load file or assembly 'NuGet.Build.Tasks -->
+    <MSBuildToolsPath2>C:\Program Files\dotnet\sdk\2.2.104</MSBuildToolsPath2>
+    <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'==''">$(MSBuildToolsPath2)\NuGet.targets</NuGetRestoreTargets>
   </PropertyGroup>
 
   <ItemGroup>

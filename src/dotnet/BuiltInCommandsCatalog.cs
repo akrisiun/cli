@@ -115,6 +115,11 @@ namespace Microsoft.DotNet.Cli
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-restore
                 DocLink = "https://aka.ms/dotnet-restore"
             },
+            ["exec"] = new BuiltInCommandMetadata
+            {
+                Command = RunCommand.Exec,
+                DocLink = "https://aka.ms/dotnet-run"
+            },
             ["run"] = new BuiltInCommandMetadata
             {
                 Command = RunCommand.Run,

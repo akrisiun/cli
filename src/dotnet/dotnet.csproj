@@ -16,6 +16,10 @@
     <LibDir>d:\Beta\dotnet\dotnet-cli\lib\</LibDir>
     <DotNetDir>d:\Beta\dotnet\dotnet-cli\.dotnet</DotNetDir>
     <StartupObject>Microsoft.DotNet.Cli.Program</StartupObject>
+
+     <!--'netcoreapp3.0;net472'-->
+    <!--<MicrosoftBuildPackageVersion>16.0.0-preview360</MicrosoftBuildPackageVersion>-->
+    <MicrosoftBuildPackageVersion>16.0.452</MicrosoftBuildPackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -63,7 +67,7 @@
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.0.0" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
@@ -71,7 +75,7 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Private.DataContractSerialization" Version="4.3.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(MicrosoftDotNetToolsMigrateCommandPackageVersion)" />
@@ -99,4 +103,18 @@
     <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
     <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).pdb" DestinationFiles="$(LibDir)\$(TargetName).pdb" SkipUnchangedFiles="false" />
   </Target>
+  <ItemGroup>
+    <!--3.0.0-preview3-27503-5
+    3.0.0-preview4-27419-7
+    3.0.100-preview4-010386
+    'Microsoft.NETCore.App' specified a Version of `3.0.0-preview4-27419-7
+    <PackageReference Include="Microsoft.NETCore.App" Version="3.0.0-preview4-27419-7" />
+    <PackageReference Include="Microsoft.Build"  Version="16.0.452" />
+    Microsoft.Build.Runtime.16.0.452.nupkg
+    -->
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
+  </ItemGroup>
+
 </Project>

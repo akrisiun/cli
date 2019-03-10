@@ -44,17 +44,19 @@ namespace Microsoft.DotNet.Cli
 
             InitializeProcess();
 
+            int ret = 0;
             try
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
-                    return ProcessArgs(args);
+                    ret = ProcessArgs(args);
+                    return ret;
                 }
             }
             catch (HelpException e)
             {
                 Reporter.Output.WriteLine(e.Message);
-                return 0;
+                ret = 0;
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
@@ -68,13 +70,13 @@ namespace Microsoft.DotNet.Cli
                     Reporter.Output.WriteLine(commandParsingException.HelpText);
                 }
 
-                return 1;
+                ret = 1;
             }
             catch (Exception e) when (!e.ShouldBeDisplayedAsError())
             {
                 Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
-                return 1;
+                ret = 1;
             }
             finally
             {
@@ -84,6 +86,8 @@ namespace Microsoft.DotNet.Cli
                     PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
                 }
             }
+
+            return ret;
         }
 
         internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)

@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Cli.Utils
@@ -73,10 +75,29 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public ProcessStartInfo GetProcessStartInfo()
         {
+            var args = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(_allArgs);
+
+            var msbuildExe = Environment.GetEnvironmentVariable("MSBUILD_EXE_PATH") ?? "";
+            var msbuildExtension = Environment.GetEnvironmentVariable("MSBUILDEXTENSIONSPATH") ?? "";
+
+            if (msbuildExe.Length == 0 &&
+                File.Exists(@"C:\bin\dotb\sdk\3.0.100-preview4-010386\MSBuild.dll")) {
+                msbuildExe = @"C:\bin\dotb\sdk\3.0.100-preview4-010386\MSBuild.dll";
+            }
+
+            var dll = @"C:\bin\dotb\MSBuild.dll";
+            if (args.StartsWith($"exec {dll}") && msbuildExe.Length > 0 &&
+                File.Exists(msbuildExe))
+            {
+                args = args.Replace(dll, msbuildExe); // Yes!
+            }
+            //  Arguments 
+            //  exec C:\bin\dotb\MSBuild.dll -maxcpucount -verbosity:m -nologo -target:Restore -distributedlogger:Microsoft.DotNet.Tools.MSBuild.MSBuildLogger,C:\bin\dotb\dotnet.dll*Microsoft.DotNet.Tools.MSBuild.MSBuildForwardingLogger,C:\bin\dotb\dotnet.dll
+
             var processInfo = new ProcessStartInfo
             {
                 FileName = GetHostExeName(),
-                Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(_allArgs),
+                Arguments = args,
                 UseShellExecute = false
             };
 
@@ -86,10 +107,57 @@ namespace Microsoft.DotNet.Cli.Utils
                 {
                     processInfo.Environment[entry.Key] = entry.Value;
                 }
+
+                var coreTrace = Environment.GetEnvironmentVariable("CORE_TRACE") ?? "";
+                if (coreTrace.Length > 0 &&
+                   !processInfo.Environment.ContainsKey("CORE_TRACE")) {
+                    processInfo.Environment["CORE_TRACE"] = coreTrace;
+                }
+
+                if (msbuildExe.Length > 0 && 
+                   !processInfo.Environment.ContainsKey("MSBUILD_EXE_PATH")) {
+                    processInfo.Environment["MSBUILD_EXE_PATH"] = msbuildExe;
+                    if (msbuildExtension.Length == 0) { 
+                        msbuildExtension = Path.GetDirectoryName(msbuildExe);
+                    }
+                }
+                if (
+                    msbuildExtension.Length > 0
+                    // !processInfo.Environment.ContainsKey("MSBUILDEXTENSIONSPATH")
+                   ) 
+                {
+                    var oldPath = processInfo.Environment["MSBUILDEXTENSIONSPATH"] ?? "";
+                    processInfo.Environment["MSBUILDEXTENSIONSPATH"] = msbuildExtension;
+                    Console.WriteLine($"MSBUILDEXTENSIONSPATH = {msbuildExtension}");
+
+                    // https://github.com/OmniSharp/omnisharp-roslyn/blob/master/tests/TestUtility/TestServiceProvider.cs
+                    // that we install locally in the ".dotnet" and ".dotnet-legacy" directories.
+                    // This property will cause the MSBuild project loader to set the
+                    // MSBuildSDKsPath environment variable to the correct path "Sdks" folder
+
+                    var _msbuildSdksPath = Path.Combine(msbuildExtension, "Sdks");
+                    // https://github.com/OmniSharp/omnisharp-roslyn/blob/master/src/OmniSharp.MSBuild/SdksPathResolver.cs
+
+                    processInfo.Environment[MSBuildSDKsPath] = _msbuildSdksPath;
+                    Console.WriteLine($"{MSBuildSDKsPath} = {_msbuildSdksPath} (OLD={oldPath}");
+
+                    var dotb = @"c:\bin\dotb\dotb.exe";
+                    processInfo.Environment[DOTNET_HOST_PATH] = dotb;
+                    Console.WriteLine($"{DOTNET_HOST_PATH} = {dotb}");
+                }
+
             }
+
+            // if verbose
+            Console.WriteLine(args);
+            Console.ResetColor();
 
             return processInfo;
         }
+
+        const string MSBuildSDKsPath = nameof(MSBuildSDKsPath);
+        const string DOTNET_HOST_PATH = nameof(DOTNET_HOST_PATH);
+   
 
         public ForwardingAppImplementation WithEnvironmentVariable(string name, string value)
         {

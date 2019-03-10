@@ -46,6 +46,8 @@ namespace Microsoft.DotNet.Tools.Run
                 EnsureProjectIsBuilt();
             }
 
+            Exception err = null;
+            int ret = -1;
             try
             {
                 ICommand targetCommand = GetTargetCommand();
@@ -53,14 +55,21 @@ namespace Microsoft.DotNet.Tools.Run
                 {
                     return 1;
                 }
-                return targetCommand.Execute().ExitCode;
+                ret = targetCommand.Execute().ExitCode;
             }
             catch (InvalidProjectFileException e)
             {
+                err = e;
+            }
+            
+            if (err != null)
+            { 
+                // throw or retry while debugging?
                 throw new GracefulException(
                     string.Format(LocalizableStrings.RunCommandSpecifiecFileIsNotAValidProject, Project),
-                    e);
+                    err as InvalidProjectFileException);
             }
+            return ret;
         }
 
         public RunCommand(string configuration,
@@ -193,6 +202,7 @@ namespace Microsoft.DotNet.Tools.Run
                 globalProperties.Add("RuntimeIdentifier", Runtime);
             }
 
+            // .nuget\packages\microsoft.build\16.0.0-preview.360\lib\netcoreapp2.1\Microsoft.Build.dll
             var project = new ProjectInstance(Project, globalProperties, null);
 
             string runProgram = project.GetPropertyValue("RunCommand");

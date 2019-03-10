@@ -6,3 +6,5 @@
 .dotnet\dotnet.exe build src\dotnet\dotnet.csproj -o .\lib\ -c Debug
 
 .\lib\dotnet.exe --info
+
+$env:DOTNET_CLI_CAPTURE_TIMING=1

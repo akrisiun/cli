@@ -126,9 +126,10 @@ namespace Microsoft.DotNet.Cli.Utils
                     // !processInfo.Environment.ContainsKey("MSBUILDEXTENSIONSPATH")
                    ) 
                 {
-                    var oldPath = processInfo.Environment["MSBUILDEXTENSIONSPATH"] ?? "";
-                    processInfo.Environment["MSBUILDEXTENSIONSPATH"] = msbuildExtension;
-                    Console.WriteLine($"MSBUILDEXTENSIONSPATH = {msbuildExtension}");
+                    var oldPath = processInfo.Environment.ContainsKey(MSBUILDEXTENSIONSPATH) ?
+                        processInfo.Environment[MSBUILDEXTENSIONSPATH] : "";
+                    processInfo.Environment[MSBUILDEXTENSIONSPATH] = msbuildExtension;
+                    Console.WriteLine($"{MSBUILDEXTENSIONSPATH} = {msbuildExtension}");
 
                     // https://github.com/OmniSharp/omnisharp-roslyn/blob/master/tests/TestUtility/TestServiceProvider.cs
                     // that we install locally in the ".dotnet" and ".dotnet-legacy" directories.
@@ -157,7 +158,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         const string MSBuildSDKsPath = nameof(MSBuildSDKsPath);
         const string DOTNET_HOST_PATH = nameof(DOTNET_HOST_PATH);
-   
+        const string MSBUILDEXTENSIONSPATH = nameof(MSBUILDEXTENSIONSPATH);
 
         public ForwardingAppImplementation WithEnvironmentVariable(string name, string value)
         {

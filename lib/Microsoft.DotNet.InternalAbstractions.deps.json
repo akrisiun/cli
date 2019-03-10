@@ -52,14 +52,14 @@
     "Microsoft.Build.Tasks.Git/1.0.0-beta2-18618-05": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kcnqXhm6lxU8UFtpVO8enW7L8Gisw05bI46B3cWlW7K1dgGPb4hAyfiGyGczYOU6n4RtHO9CCfh0Lk74qkbF6w==",
+      "sha512": "sha512-uKO9PC5WNDrB5xlC0aUVBIqsEmTtgBk4w5jQPXdcdRAsqwjtfjRQhbTAYUnJlbgSYRdULb7PX2MCwuI/GVYWvA==",
       "path": "microsoft.build.tasks.git/1.0.0-beta2-18618-05",
       "hashPath": "microsoft.build.tasks.git.1.0.0-beta2-18618-05.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "sha512": "sha512-a/iSwnRZb+LHFk49hQOyThh/ZNC3vsbZsF65XwQIb863qF6msmhdQtxGXFL28Ob2NsCz/drEj28BJd/YPpLRBg==",
       "path": "microsoft.netcore.platforms/1.1.0",
       "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
     },
@@ -73,7 +73,7 @@
     "Microsoft.SourceLink.Common/1.0.0-beta2-18618-05": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-eJP4JUDOiiWPBvwN+/0v1otoT8VPFOm6upABUAS6TwFbLfjRiLI2Ko44gyxF0nW+uMQHx186tnTDt+fg7je97Q==",
+      "sha512": "sha512-J+5FExH/u3ZrpFn/vlia9G1YB/wKs0bgn473p9UKs1KlPROLpsm1YF2u09BUpuC8ckoYxL0E9op4H0unWrEFxg==",
       "path": "microsoft.sourcelink.common/1.0.0-beta2-18618-05",
       "hashPath": "microsoft.sourcelink.common.1.0.0-beta2-18618-05.nupkg.sha512"
     },
@@ -87,14 +87,14 @@
     "Microsoft.SourceLink.Vsts.Git/1.0.0-beta2-18618-05": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Z6htsKikWDT/30r4SC6w1+D2kKrvZwWddmP9Woy72TIuHqT484ziF9AEczcXK8a+oXmcx6FZJPDGCnyTEoxLnA==",
+      "sha512": "sha512-65kjHPcFr2BwWSQuDShpgJ8WkXy4WM8UPMSSxmc0CpGAx0C339LAmr9NFi5eh1QXGkHO14Z4doJhiS9rjlgqoA==",
       "path": "microsoft.sourcelink.vsts.git/1.0.0-beta2-18618-05",
       "hashPath": "microsoft.sourcelink.vsts.git.1.0.0-beta2-18618-05.nupkg.sha512"
     },
     "NETStandard.Library/2.0.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
+      "sha512": "sha512-548M6mnBSJWxsIlkQHfbzoYxpiYFXZZSL00p4GHYv8PkiqFBnnT68mW5mGEsA/ch9fDO9GkPgkFQpWiXZN7mAQ==",
       "path": "netstandard.library/2.0.3",
       "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
     },

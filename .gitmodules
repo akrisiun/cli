@@ -1,0 +1,3 @@
+[submodule "vendor/core-sdk"]
+	path = vendor/core-sdk
+	url = https://github.com/akrisiun/core-sdk

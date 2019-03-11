@@ -1,45 +1,7 @@
 # .NET Command Line Interface
 
-### Problem:
-```
-NuGet.targets(367,5): error MSB4062: The "NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask" 
-task could not be loaded from the assembly C:\bin\dotb\NuGet.Build.Tasks.dll. 
-Could not load file or assembly 'NuGet.Build.Tasks, Culture=neutral, PublicKeyToken=null'. 
-The system cannot find the file specified. Confirm that the <UsingTask> decl
-
-<PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-preview1.5663" />
-
-{"The \"ResolveFrameworkReferences\" task was not given a value for the required parameter \"RuntimeGraphPath\". 
-Sdks\\Microsoft.NET.Sdk\\targets\\Microsoft.NET.Sdk.TargetingPackResolution.targets"}
-
-  
-dotnet-cli\Directory.Build.props(48,3): warning MSB4243:
-The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located. 
-Check your installation of MSBuild or set the environment variable "MSBUILD_NUGET_PATH" to the folder that contains the required NuGet assemblies. Could not load file or assembly 'NuGet.Commands, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35'. The system cannot find the file specified.
-
-Checking Microsoft.NET.Build.Tasks.ResolveFrameworkReferences in  Sdks\Microsoft.NET.Sdk\targets\..\tools\netcoreapp2.0/Microsoft.NET.Build.Tasks.dll
-Sdks\Microsoft.NET.Sdk\targets\Microsoft.NET.Sdk.TargetingPackResolution.targets(53,5):
-error MSB4044: The "ResolveFrameworkReferences" task was not given a value for the required parameter "RuntimeGraphPath".
-```
-
-Versions:
-```
-MSBuild, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a 		 | c:\bin\dotb\MSBuild.dll
-Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed  | c:\bin\dotb\Newtonsoft.Json.dll
-NuGet.Build.Tasks, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Build.Tasks.dllNuGet.CommandLine.XPlat, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.CommandLine.XPlat.dll
-NuGet.Commands, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35    | c:\bin\dotb\NuGet.Commands.dll
-NuGet.Common, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35      | c:\bin\dotb\NuGet.Common.dll
-NuGet.Configuration, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Configuration.dll
-NuGet.Credentials, Version=5.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a   | c:\bin\dotb\NuGet.Credentials.dllNuGet.DependencyResolver.Core, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.DependencyResolver.Core.dll
-NuGet.Frameworks, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35    | c:\bin\dotb\NuGet.Frameworks.dll
-NuGet.LibraryModel, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35  | c:\bin\dotb\NuGet.LibraryModel.dll
-NuGet.Packaging, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35      | c:\bin\dotb\NuGet.Packaging.dll
-NuGet.Packaging.Core, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Packaging.Core.dll
-NuGet.ProjectModel, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35   | c:\bin\dotb\NuGet.ProjectModel.dll
-NuGet.Protocol, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35       | c:\bin\dotb\NuGet.Protocol.dll
-NuGet.Versioning, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35     | c:\bin\dotb\NuGet.Versioning.dll
-
-```
+2.1.601-preview-009580
+App 2.1.9
 
 
 [![.NET Slack Status](https://aspnetcoreslack.herokuapp.com/badge.svg?2)](http://tattoocoder.com/aspnet-slack-sign-up/) [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

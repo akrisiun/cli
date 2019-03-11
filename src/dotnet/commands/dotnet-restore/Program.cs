@@ -47,6 +47,12 @@ namespace Microsoft.DotNet.Tools.Restore
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }
 
+        public static int Exec(string[] args)
+        {
+            var ret = Run(args);
+            return ret;
+        }
+
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);

@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <OutputType>Exe</OutputType>
-    <MicrosoftBuildPackageVersion>16.0.452</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>16.0.450</MicrosoftBuildPackageVersion>
 
     <Version>1.1.0</Version>
     <minus>-</minus>
-    <LibDir>c:\bin\dotb</LibDir>
-    <!-- -->
+    <LibDir>c:\bin\dotc</LibDir>
     <!--<DotNetDir>$(USERPROFILE)/.dotnet/x64/</DotNetDir>-->
     <DotNetDir>E:\Beta\dot64\dotnet-cli\.dotnet\</DotNetDir>
 
@@ -25,12 +24,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--<NewtonsoftVersion>9.0.1</NewtonsoftVersion>-->
+	<PackageReference Include="Microsoft.NETCore.App" Version="2.1.9" />
+	<PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="2.1.9" />  
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
     <!-- 
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
-    -->
-    <!--<PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildPackageVersion)" />
 	-->
@@ -48,11 +47,10 @@
     <Reference Include="Microsoft.Build.Framework, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\lib\Microsoft.Build.Framework.dll</HintPath>
     </Reference>
-    <!--       Version=15.1.0.455, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
-    -->
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\nuget\Newtonsoft.Json.dll</HintPath>
     </Reference>
+	<!--
     <Reference Include="NuGet.Build.Tasks">
       <HintPath>..\nuget\NuGet.Build.Tasks.dll</HintPath>
     </Reference>
@@ -74,19 +72,7 @@
     <Reference Include="NuGet.DependencyResolver.Core">
       <HintPath>..\nuget\NuGet.DependencyResolver.Core.dll</HintPath>
     </Reference>
-    <!--<Reference Include="NuGet.Frameworks">
-      <HintPath>..\nuget\NuGet.Frameworks.dll</HintPath>
-      <Private>true</Private>
-    </Reference>-->
-    <!-- NuGet.Frameworks preview1.5663 
-    https://dotnet.myget.org/feed/nuget-build/package/nuget/NuGet.Commands
-    5.1.0-rtm.5864
-    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-rtm.5821" />
-    -->
-    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-preview1.5663" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-preview1.5663" />
-    <PackageReference Include="NuGet.Commands" Version="5.0.0-preview1.5663" />
-    
+
     <Reference Include="NuGet.LibraryModel">
       <HintPath>..\nuget\NuGet.LibraryModel.dll</HintPath>
     </Reference>
@@ -105,17 +91,25 @@
     <Reference Include="NuGet.Versioning">
       <HintPath>..\nuget\NuGet.Versioning.dll</HintPath>
     </Reference>
+	
+     NuGet.Frameworks preview1.5663 
+    https://dotnet.myget.org/feed/nuget-build/package/nuget/NuGet.Commands
+    5.1.0-rtm.5864
+    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-rtm.5821" /> 
+    5.1.0-rtm.5864
+    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-rtm.5821" />
+    -->
+    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-preview1.5663" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-preview1.5663" />
+    <PackageReference Include="NuGet.Commands" Version="5.0.0-preview1.5663" />
+    
   </ItemGroup>
   <Target Name="PostBuildTask" AfterTargets="Build">
     <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | copy to $(LibDir)\$(TargetName).dll" />
     <Message Condition="!Exists($(LibDir))" Importance="High" Text="NO $(LibDir)" />
     
     <Exec Condition="'$(MSBuildRuntimeType)' == 'Full'" Command="$(DotNetDir)dotnet.exe build $(SourceDir) -o $(LibDir) -c Debug --no-restore" />
-    <!--
-
-    -->
     <Exec Condition="'$(MSBuildRuntimeType)' == 'Full'" Command="$(DotNetDir)dotnet.exe build ..\..\vendor\msbuild\src\MSBuild\MSBuild.csproj -f netcoreapp3.0 -o $(LibDir) -c Debug --no-restore" />
-          
     
     <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
   </Target>

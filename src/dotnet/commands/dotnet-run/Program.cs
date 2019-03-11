@@ -31,6 +31,12 @@ namespace Microsoft.DotNet.Tools.Run
                     .ToList());
         }
 
+        public static int Exec(string[] args)
+        {
+            var ret = Run(args);
+            return ret;
+        }
+
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);

@@ -92,6 +92,8 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
     $InstallArchitecture = "x64"
 }
 
+# Downloading link: https://dotnetcli.azureedge.net/dotnet/Sdk/2.1.403/dotnet-sdk-2.1.403-win-x64.zip
+
 Write-Output "$dotnetInstallPath -version ""2.1.403"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 Invoke-Expression "$dotnetInstallPath -version ""2.1.403"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 

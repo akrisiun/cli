@@ -1,0 +1,6 @@
+[submodule "vendor/core-sdk"]
+	path = vendor/core-sdk
+	url = https://github.com/akrisiun/core-sdk
+[submodule "vendor/msbuild"]
+	path = vendor/msbuild
+	url = https://github.com/akrisiun/msbuild

@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
             {
                 Command = MigrateCommandCompose.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-migrate
-                DocLink = "http://aka.ms/dotnet-migrate"
+                DocLink = "https://aka.ms/dotnet-migrate"
 
             },
             ["msbuild"] = new BuiltInCommandMetadata
@@ -114,6 +114,11 @@ namespace Microsoft.DotNet.Cli
                 Command = RestoreCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-restore
                 DocLink = "https://aka.ms/dotnet-restore"
+            },
+            ["exec"] = new BuiltInCommandMetadata
+            {
+                Command = RunCommand.Exec,
+                DocLink = "https://aka.ms/dotnet-run"
             },
             ["run"] = new BuiltInCommandMetadata
             {

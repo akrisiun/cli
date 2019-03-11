@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "dotnet": {
+      "commandName": "Executable",
+      "executablePath": "c:\\bin\\dotc\\dotnet.exe",
+      "commandLineArgs": "--debug restore",
+      "workingDirectory": "e:\\Beta\\dot64\\dotnet-cli\\src\\dotnet\\"
+    }
+  }
+}

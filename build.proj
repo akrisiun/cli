@@ -6,6 +6,9 @@
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" Exclude="build_projects/**/obj/**/*.cs" />
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <PreviousStageDotnet>E:\Beta\dot64\dotnet-cli/.dotnet/dotnet.exe</PreviousStageDotnet>
+  </PropertyGroup>
 
   <!-- Workaround to "Native image cannot be loaded multiple times" issue
        A target in the top level file needs to run and invoke a task

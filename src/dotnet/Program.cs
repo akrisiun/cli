@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+//using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Telemetry;
@@ -30,10 +30,7 @@ namespace Microsoft.DotNet.Cli
 
         public static int Main(string[] args)
         {
-            // Console.WriteLine("Waiting debugger");
-            // DebugHelper.WaitForDebugger();
             DebugHelper.HandleDebugSwitch(ref args);
-
 
             new MulticoreJitActivator().TryActivateMulticoreJit();
 
@@ -50,7 +47,17 @@ namespace Microsoft.DotNet.Cli
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
+                    // NuGet.Frameworks, Version=5.0.0.1
+                    // NuGet.Frameworks, Version=5.0.0.4
+                    if (args.Length >= 1 && args[0] == "--info") // || CommandContext.IsVerbose())
+                    {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        ProcessDomain();
+                        Console.ResetColor();
+                    }
+
                     ret = ProcessArgs(args);
+
                     return ret;
                 }
             }
@@ -58,6 +65,12 @@ namespace Microsoft.DotNet.Cli
             {
                 Reporter.Output.WriteLine(e.Message);
                 ret = 0;
+            }
+            catch (FileNotFoundException e) 
+            {
+                Reporter.Error.WriteLine($"no file {e}");
+                ProcessDomain();
+                ret = 1;
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
@@ -88,7 +101,7 @@ namespace Microsoft.DotNet.Cli
                 }
             }
 
-            if (CommandContext.IsVerbose())
+            if (ret != 0 && CommandContext.IsVerbose())
             {
                 ProcessDomain();
             }
@@ -103,15 +116,21 @@ namespace Microsoft.DotNet.Cli
             var list = asm.Where((a) => !a.IsDynamic).OrderBy((a) => a.FullName);
 
             var dotAsm = typeof(Program).Assembly;
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.Write($"{domain.BaseDirectory} : {dotAsm.FullName} - exe {dotAsm.Location}");
+            Console.ResetColor();
 
             foreach (Assembly a in list) {
-                Console.Write($"{a.FullName} | {a.Location}");
+                Console.WriteLine($"{a.FullName} | {a.Location}");
             }
+            
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            NugetLib.Load.Assemblies();
+
             Console.ResetColor();
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
+        public static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
@@ -239,6 +258,11 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
+                if (topLevelCommandParserResult.Command == "restore")
+                {
+                    NugetLib.Load.Assemblies();    
+                }
+
                 var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
                 if (!parseResult.Errors.Any())
                 {
@@ -246,6 +270,19 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 exitCode = builtIn.Command(appArgs.ToArray());
+            }
+            else if (topLevelCommandParserResult.Command.EndsWith(".dll"))
+            {
+                var newArgs = new List<string>();
+                newArgs.Add(topLevelCommandParserResult.Command);
+                newArgs.AddRange(appArgs);
+                
+                CommandResult result = CommandFactoryUsingResolver.Create(
+                        "dotnet" ,
+                        newArgs,
+                        FrameworkConstants.CommonFrameworks.NetStandardApp15)
+                    .Execute();
+                exitCode = result.ExitCode;
             }
             else
             {

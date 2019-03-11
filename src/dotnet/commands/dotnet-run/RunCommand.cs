@@ -12,6 +12,7 @@ using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
 using Microsoft.DotNet.CommandFactory;
+using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -55,6 +56,7 @@ namespace Microsoft.DotNet.Tools.Run
                 {
                     return 1;
                 }
+                
                 ret = targetCommand.Execute().ExitCode;
             }
             catch (InvalidProjectFileException e)
@@ -142,17 +144,25 @@ namespace Microsoft.DotNet.Tools.Run
         {
             var restoreArgs = GetRestoreArguments();
 
-            var buildResult =
+            var cmd =
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
                     restoreArgs,
-                    new [] { Project },
+                    new[] { Project },
                     NoRestore
-                ).Execute();
+                );
+            var buildResult = cmd.Execute();
 
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();
+                
+                Reporter.Error.WriteLine("Debugger.Break()");
+                if (Debugger.IsAttached)
+                    Debugger.Break();
+                //else 
+                //    Debugger.Launch();
+
                 throw new GracefulException(LocalizableStrings.RunCommandException);
             }
         }

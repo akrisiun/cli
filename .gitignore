@@ -310,7 +310,9 @@ launchSettings.json
 lib/dotnet/
 lib/lib.zip
 lib/sdk/
-vendor/
+vendor/msbuild/
 lib/
 
 *.dev.json
+vendor/dotnet/
+*.exe

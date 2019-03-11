@@ -24,5 +24,6 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
 $ArchitectureParam="/p:Architecture=$Architecture"
 $ConfigurationParam="-configuration $Configuration"
 
+write-host "$RepoRoot\eng\common\build.ps1 -restore -build $ConfigurationParam $ArchitectureParam $ExtraParameters"
 Invoke-Expression "$RepoRoot\eng\common\build.ps1 -restore -build $ConfigurationParam $ArchitectureParam $ExtraParameters"
-if($LASTEXITCODE -ne 0) { throw "Failed to build" }
+if($LASTEXITCODE -ne 0) { write-host "Failed to build" }

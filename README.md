@@ -1,5 +1,24 @@
 # .NET Command Line Interface
 
+Versions:
+```
+MSBuild, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a 		 | c:\bin\dotb\MSBuild.dll
+Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed  | c:\bin\dotb\Newtonsoft.Json.dll
+NuGet.Build.Tasks, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Build.Tasks.dllNuGet.CommandLine.XPlat, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.CommandLine.XPlat.dll
+NuGet.Commands, Version=5.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35    | c:\bin\dotb\NuGet.Commands.dll
+NuGet.Common, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35      | c:\bin\dotb\NuGet.Common.dll
+NuGet.Configuration, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Configuration.dll
+NuGet.Credentials, Version=5.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a   | c:\bin\dotb\NuGet.Credentials.dllNuGet.DependencyResolver.Core, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.DependencyResolver.Core.dll
+NuGet.Frameworks, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35    | c:\bin\dotb\NuGet.Frameworks.dll
+NuGet.LibraryModel, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35  | c:\bin\dotb\NuGet.LibraryModel.dll
+NuGet.Packaging, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35      | c:\bin\dotb\NuGet.Packaging.dll
+NuGet.Packaging.Core, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35 | c:\bin\dotb\NuGet.Packaging.Core.dll
+NuGet.ProjectModel, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35   | c:\bin\dotb\NuGet.ProjectModel.dll
+NuGet.Protocol, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35       | c:\bin\dotb\NuGet.Protocol.dll
+NuGet.Versioning, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35     | c:\bin\dotb\NuGet.Versioning.dll
+
+```
+
 https://dotnetcli.azureedge.net/dotnet/Runtime/1.1.2/dotnet-win-x64.1.1.2.zip
 
 [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

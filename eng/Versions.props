@@ -62,6 +62,7 @@
   <PropertyGroup>
     <RestoreSources>
       $(RestoreSources);
+	  https://localhost/nuget/nuget/;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;

@@ -12,15 +12,31 @@
     <PackageId>Microsoft.DotNet.Cli</PackageId>
     <UseAppHost>false</UseAppHost>
     <IsPackable>true</IsPackable>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     
-    <LibDir>d:\Beta\dotnet\dotnet-cli\lib\</LibDir>
-    <DotNetDir>d:\Beta\dotnet\dotnet-cli\.dotnet</DotNetDir>
+    <Version>3.0.0</Version>
+    <!--<NewtonsoftVersion>9.0.1</NewtonsoftVersion>-->
+    <NewtonsoftVersion>10.0.3</NewtonsoftVersion>
+    
+    <minus>-</minus>
+    <LibDir>c:\bin\dotb</LibDir>
+    <DotNetDir>$(USERPROFILE)/.dotnet/x64</DotNetDir>
     <StartupObject>Microsoft.DotNet.Cli.Program</StartupObject>
 
      <!--'netcoreapp3.0;net472'-->
     <!--<MicrosoftBuildPackageVersion>16.0.0-preview360</MicrosoftBuildPackageVersion>-->
     <MicrosoftBuildPackageVersion>16.0.452</MicrosoftBuildPackageVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>BETA</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
     <Compile Include="commands\dotnet-new\*.cs" />
@@ -65,9 +81,11 @@
     <ProjectReference Include="../Microsoft.DotNet.InternalAbstractions/Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
+    <ProjectReference Include="..\..\vendor\NugetLib\NugetLib.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <!--<PackageReference Include="Newtonsoft.Json" Version="12.0.1" />-->
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.0.0" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
@@ -75,7 +93,10 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Private.DataContractSerialization" Version="4.3.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
+    <PackageReference Include="NuGet.Build" Version="2.12.1" />
+     
     <!--
+    NuGet.Build - version 2.12.1 
     The type 'ValueType' is defined in an assembly that is not referenced. You must add a reference to assembly
     'netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51'. [dotnet] -->
 
@@ -100,12 +121,6 @@
   </Target>
   <Target Name="PostBuildTask" AfterTargets="Build">
   </Target>
-  <Target Name="ExecBuild">  
-    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
-    <Exec Command="$(DotNetDir)\dotnet.exe build -o $(LibDir) -c Debug --no-restore" />
-    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
-    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)\$(TargetName).pdb" DestinationFiles="$(LibDir)\$(TargetName).pdb" SkipUnchangedFiles="false" />
-  </Target>
   <ItemGroup>
     <!--3.0.0-preview3-27503-5
     3.0.0-preview4-27419-7
@@ -120,4 +135,18 @@
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
 
+  <Target Name="ExecBuild">
+    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)\dotnet.dll" />
+    <Message Condition="Exists($(LibDir))" Importance="High" Text="$(DotNetDir)\dotnet.exe build -o $(LibDir) -c Debug --no-restore" />
+    <Exec Command="$(DotNetDir)/dotnet.exe build $(SourceDir) -o $(LibDir) -c Debug $(minus)$(minus)no-restore" />
+    
+  </Target>
+  <Target Name="PostBuildTask" AfterTargets="Build">
+    <Message Condition="Exists($(LibDir))" Importance="High" Text="MSBuildRuntimeType=$(MSBuildRuntimeType)" />
+    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | copy to $(LibDir)\dotnet.dll" />
+    <Message Condition="!Exists($(LibDir))" Importance="High" Text="NO $(LibDir)" />
+    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
+
+  </Target>
+ 
 </Project>

@@ -11,6 +11,8 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <IsPackable>true</IsPackable>
 
+    <Version>3.0.0</Version>
+
     <MicrosoftBuildPackageVersion>16.0.452</MicrosoftBuildPackageVersion>
     <DisableWarnForInvalidRestoreProjects>true</DisableWarnForInvalidRestoreProjects>
     <!-- 3.0.100-preview4-010386\NuGet.targets(266,5): 

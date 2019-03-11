@@ -34,6 +34,13 @@ namespace Microsoft.DotNet.Cli.Utils
                 _process.StartInfo.FileName,
                 _process.StartInfo.Arguments));
 
+            var firstArg = _process.StartInfo.Arguments ?? "";
+            var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "";
+            if (dotnet.Length > 0 && File.Exists(dotnet) && !firstArg.Contains(".dll"))
+            {
+                _process.StartInfo.FileName = dotnet;
+            }
+
             ThrowIfRunning();
 
             _running = true;

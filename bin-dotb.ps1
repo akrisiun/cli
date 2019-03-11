@@ -12,8 +12,11 @@ if (-not (test-path c:\bin\dotb\dotnet.dll)) {
 
 $env:DOTNET_CLI_CAPTURE_TIMING=1
 $env:MSBUILD_EXE_PATH="c:\bin\dotb\sdk\3.0.100-preview4-010386\MSBuild.dll"
+# $env:MSBUILD_EXE_PATH="c:\bin\dotb\MSBuild.dll"
 $env:MSBUILDEXTENSIONSPATH="c:\bin\dotb\sdk\3.0.100-preview4-010386"
+$env:MSBuildSDKsPath="c:\bin\dotb\sdk\3.0.100-preview4-010386\Sdks"
 
+# 3.0.100-preview4-010386
 $env:MSBUILD_EXE_PATH="c:\Program Files\dotnet\3.0.100-preview4-010386\MSBuild.dll"
 $env:MSBUILDEXTENSIONSPATH="c:\Program Files\dotnet\3.0.100-preview4-010386"
 $env:MSBuildSDKsPath="c:\Program Files\dotnet\sdk\2.2.104\Sdks"

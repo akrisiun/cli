@@ -14,6 +14,8 @@ namespace NugetLib
             "Newtonsoft.Json",
             "NuGet.Frameworks",
             "NuGet.Build.Tasks",
+			"Microsoft.Build.Framework",
+			"Microsoft.Build",
             "NuGet.CommandLine.XPlat",
             "NuGet.Commands",
             "NuGet.Common",
@@ -59,7 +61,7 @@ namespace NugetLib
                     {
                         Assembly asm = Assembly.LoadFile(file);
                         List.Add(asm);
-                        if (IsVerbose || i < 4)
+                        if (IsVerbose || i < 6)
                         {
                             Console.WriteLine($"{asm.FullName} | {asm.Location}");
                         }

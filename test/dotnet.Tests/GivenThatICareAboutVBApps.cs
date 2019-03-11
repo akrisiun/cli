@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
         }
-
+        /*  shoud be F# no VB...
         [Fact]
         public void ICanBuildVBApps()
         {
@@ -66,5 +66,6 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }
+        */
     }
 }

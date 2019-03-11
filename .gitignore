@@ -316,3 +316,4 @@ lib/
 *.dev.json
 vendor/dotnet/
 *.exe
+vendor/toolset/

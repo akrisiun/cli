@@ -16,7 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{17735A9D-B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{89905EC4-BC0F-443B-8ADF-691321F10108}"
 	ProjectSection(SolutionItems) = preProject
-		build\Branding.props = build\Branding.props
 		build\BuildDefaults.props = build\BuildDefaults.props
 		build\BundledSdks.props = build\BundledSdks.props
 		build\FileExtensions.props = build\FileExtensions.props

@@ -29,40 +29,30 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
     <!-- 
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
-
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
     -->
-    <!--<PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />-->
+    <!--<PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildPackageVersion)" />
+	-->
     <!--<PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />-->
     <!--<ProjectReference Include="..\msbuild\src\MSBuild\MSBuild.csproj" />-->
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="MSBuild">
+    <Reference Include="MSBuild, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\lib\MSBuild.dll</HintPath>
     </Reference>
-    <!--
     <Reference Include="Microsoft.Build">
       <HintPath>..\lib\Microsoft.Build.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Build.Framework">
+    <Reference Include="Microsoft.Build.Framework, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\lib\Microsoft.Build.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\nuget\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build">
-      <HintPath>..\lib\Microsoft.Build.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build.Framework">
-      <HintPath>..\lib\Microsoft.Build.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\nuget\Newtonsoft.Json.dll</HintPath>
-    </Reference>
+    <!--       Version=15.1.0.455, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a
     -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\nuget\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NuGet.Build.Tasks">
       <HintPath>..\nuget\NuGet.Build.Tasks.dll</HintPath>
     </Reference>
@@ -88,8 +78,14 @@
       <HintPath>..\nuget\NuGet.Frameworks.dll</HintPath>
       <Private>true</Private>
     </Reference>-->
+    <!-- NuGet.Frameworks preview1.5663 
+    https://dotnet.myget.org/feed/nuget-build/package/nuget/NuGet.Commands
+    5.1.0-rtm.5864
     <PackageReference Include="NuGet.Frameworks" Version="5.0.0-rtm.5821" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-rtm.5821" />
+    -->
+    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-preview1.5663" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-preview1.5663" />
+    <PackageReference Include="NuGet.Commands" Version="5.0.0-preview1.5663" />
     
     <Reference Include="NuGet.LibraryModel">
       <HintPath>..\nuget\NuGet.LibraryModel.dll</HintPath>

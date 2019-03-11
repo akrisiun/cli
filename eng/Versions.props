@@ -40,9 +40,22 @@
     <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26620-03</MicrosoftDotNetPlatformAbstractionsPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>2.2.0-preview1-26620-03</MicrosoftExtensionsDependencyModelPackageVersion>
     <MicrosoftDotNetCliCommandLinePackageVersion>1.0.0-preview.19115.1</MicrosoftDotNetCliCommandLinePackageVersion>
-    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.2-preview.19074.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
-    <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
+
+    <!--<MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.2-preview.19074.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>-->
+    <!--<MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>-->
+
+    <!--
+    5.0.0.4
     <NuGetBuildTasksPackageVersion>5.0.0-rtm.5821</NuGetBuildTasksPackageVersion>
+    
+    5.0.0.1
+    preview1.5663: https://github.com/dotnet/cli/blob/b998b6a435935520015ede2cb1232048d62f2579/build/DependencyVersions.props
+    -->
+    <NuGetBuildTasksPackageVersion>5.0.0-preview1.5663</NuGetBuildTasksPackageVersion>
+    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
+    <MicrosoftDotNetToolsMigrateCommandPackageVersion>1.3.1</MicrosoftDotNetToolsMigrateCommandPackageVersion>
+
+    
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
@@ -60,9 +73,11 @@
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
   </PropertyGroup>
   <PropertyGroup>
+    <!--http://black/nuget/nuget/;
+    -->
+
     <RestoreSources>
       $(RestoreSources);
-	  https://localhost/nuget/nuget/;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;

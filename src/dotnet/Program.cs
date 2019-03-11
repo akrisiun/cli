@@ -258,11 +258,6 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
-                if (topLevelCommandParserResult.Command == "restore")
-                {
-                    NugetLib.Load.Assemblies();    
-                }
-
                 var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
                 if (!parseResult.Errors.Any())
                 {
@@ -270,6 +265,14 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 exitCode = builtIn.Command(appArgs.ToArray());
+
+                var cmd = topLevelCommandParserResult.Command;
+                if ((cmd == "restore" || cmd == "build") &&
+                    exitCode != 0)
+                {
+                    // not ok restore
+                    NugetLib.Load.Assemblies();    
+                }
             }
             else if (topLevelCommandParserResult.Command.EndsWith(".dll"))
             {

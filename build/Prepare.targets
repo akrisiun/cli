@@ -40,6 +40,9 @@
       <OverwriteExtractionDestination Condition="'$(OverwriteExtractionDestination)' == ''">True</OverwriteExtractionDestination>
     </PropertyGroup>
 
+	<Message Importance="High"
+		Text="DownloadFile Uri=%(_DownloadAndExtractItem.Url) -o %(_DownloadAndExtractItem.DownloadFileName)" />
+
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />

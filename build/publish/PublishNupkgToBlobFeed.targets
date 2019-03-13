@@ -6,7 +6,7 @@
       <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.Cli.Utils.*.nupkg"
                            Exclude="$(PackagesDirectory)/*.symbols.nupkg"
                            Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " >
-        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
+		<ManifestArtifactData>NonShipping=true</ManifestArtifactData>
       </NupkgsForPublishing>
       <NupkgsForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg"
                            Exclude="$(PackagesDirectory)/*.symbols.nupkg"

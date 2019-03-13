@@ -38,7 +38,7 @@ namespace NugetLib
             var args = string.Join(" ", Environment.GetCommandLineArgs());
             IsVerbose = args.Contains("-v d") || args.Contains("--debug")  || args.Contains("--info");
 
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var baseDir = AppContext.BaseDirectory; // AppDomain.CurrentDomain.BaseDirectory;
             var msExt = Environment.GetEnvironmentVariable("MSBUILDEXTENSIONSPATH") ?? "";
             if (msExt.Length > 0)
             {
@@ -59,7 +59,7 @@ namespace NugetLib
                 {
                     try
                     {
-                        Assembly asm = Assembly.LoadFile(file);
+                        Assembly asm = null; // TODO Assembly.LoadFile(file);
                         List.Add(asm);
                         if (IsVerbose || i < 6)
                         {
@@ -80,18 +80,20 @@ namespace NugetLib
 
         public static Assembly MSBuildApp { 
             get {
-                return typeof(Microsoft.Build.CommandLine.MSBuildApp).Assembly;
+                return null; // typeof(Microsoft.Build .CommandLine.MSBuildApp).Assembly;
             }
         }
 
         public static int Build(string[] args)
         {
-            int ret = 0;
+            int ret = -1;
+            /* TODO
             var ret1 = Microsoft.Build.CommandLine.MSBuildApp.Execute(args);
             if (ret1 != Microsoft.Build.CommandLine.MSBuildApp.ExitType.Success)
             {
                 ret = (int)ret1;
             }
+            */
 
             return ret;
         }

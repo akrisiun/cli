@@ -6,6 +6,12 @@ REM Licensed under the MIT license. See LICENSE file in the project root for ful
 @REM # powershell -ExecutionPolicy Bypass -NoProfile -NoLogo -Command "& \"%~dp0run-build.ps1\" %*; exit $LastExitCode;"
 @REM # if %errorlevel% neq 0 exit /b %errorlevel%
 
-@REM .dotnet/dotnet msbuild build.proj /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+@REM .\run-build.ps1 -InitTools
 
-.dotnet/dotnet.exe msbuild build.proj /v:n
+.dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:restore
+.dotnet/dotnet msbuild build.proj /v:d /t:restore
+@REM .dotnet/dotnet msbuild build.proj /v:d /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+@REM # 2.1.403
+@REM .dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:build
+
+.dotnet/dotnet msbuild build.proj /v:n

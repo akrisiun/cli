@@ -6,6 +6,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>bin\$(Configuration)</OutputPath>
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
+    
+    <VersionToolsVersion>3.0.0-preview4-03811-01</VersionToolsVersion>
+    <!--<BuildTasksFeedToolVersion>1.0.0-prerelease-01929-02</BuildTasksFeedToolVersion>
+    dotnet-cli-build
+    -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,10 +26,12 @@
     <PackageReference Include="System.Dynamic.Runtime" Version="4.0.11" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <PackageReference Include="System.Spatial" Version="5.6.4" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
     <PackageReference Include="WindowsAzure.Storage" Version="7.2.1" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.0.0" />
 
+     <!-- Microsoft.DotNet.VersionTools 3.0.0-preview4-03811-01 -->
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(BuildTasksFeedToolVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />

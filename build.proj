@@ -7,14 +7,15 @@
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.csproj" />
   </ItemGroup>
   <PropertyGroup>
-    <PreviousStageDotnet>E:\Beta\dot64\dotnet-cli/.dotnet/dotnet.exe</PreviousStageDotnet>
+	    <dotnet>$(RepoRoot).dotnet/dotnet</dotnet>
+      <PreviousStageDotnet>$(RepoRoot).dotnet/dotnet</PreviousStageDotnet>
   </PropertyGroup>
 
   <!-- Workaround to "Native image cannot be loaded multiple times" issue
        A target in the top level file needs to run and invoke a task
        https://github.com/Microsoft/msbuild/issues/750 -->
   <Target Name="MSBuildWorkaroundTarget">
-    <Message Text="Dont remove this target" />
+    <Message Text="Dont remove this target, build: $(dotnet)" />
   </Target>
 
   <Target Name="BuildDotnetCliBuildFramework"
@@ -23,7 +24,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(PreviousStageDotnet) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework $(CliTargetFramework) /p:GeneratePropsFile=$(GeneratePropsFile)" 
+    <Exec Command="$(PreviousStageDotnet) publish --no-restore -o $(DotnetCliBuildDirectory)/bin/2 --framework $(CliTargetFramework) /p:GeneratePropsFile=$(GeneratePropsFile)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
@@ -41,9 +42,10 @@
     <PropertyGroup>
       <ExtraRestoreArgs>$(ExtraRestoreArgs) /p:GeneratePropsFile=$(GeneratePropsFile)</ExtraRestoreArgs>
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
+	    <dotnet>$(RepoRoot).dotnet/dotnet$(ExeExtension)</dotnet>
     </PropertyGroup>
 
-    <Exec Command="$(PreviousStageDotnet) restore $(ExtraRestoreArgs)" 
+    <Exec Command="$(dotnet) restore ../../build.proj $(ExtraRestoreArgs)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 

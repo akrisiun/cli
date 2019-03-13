@@ -167,6 +167,8 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
             try
             {
                 Log.LogMessage("Uploading {0} to {1}.", item.ItemSpec, ContainerName);
+                throw new Exception("no anyway Azure");
+                /* no Azure :(
                 UploadClient uploadClient = new UploadClient(Log);
                 await
                     uploadClient.UploadBlockBlobAsync(
@@ -176,6 +178,7 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
                         ContainerName,
                         item.ItemSpec,
                         relativeBlobPath);
+                */
             }
             finally
             {

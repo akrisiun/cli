@@ -79,10 +79,53 @@
   </Target>
 
   <Target Name="ChmodPublishDir"
-          AfterTargets="PublishMSBuildExtensions"
-          Condition=" '$(OS)' != 'Windows_NT' ">
-    
-    <Exec Command="find $(OutputPath) -type d -exec chmod 755 {} \;" />
-    <Exec Command="find $(OutputPath) -type f -exec chmod 644 {} \;" />
+          AfterTargets="CrossgenPublishDir"
+          Condition=" '$(OSName)' != 'win' ">
+
+    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
+  </Target>
+
+  <Target Name="SeparateSymbolsFromPublishDir"
+          AfterTargets="CrossgenPublishDir">
+    <ItemGroup>
+      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
+    </ItemGroup>
+
+    <Move SourceFiles="@(PdbsToMove)"
+          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="PublishStage2WithBackwardsCompatibleRuntimes"
+          AfterTargets="PublishLzmaArchive;">
+    <ItemGroup>
+      <BackwardsCompatibleSharedFrameworks Remove="*" />
+      <BackwardsCompatibleSharedFrameworks Include="$(BackwardsCompatibleSharedFrameworksPublishDirectory)/**/*" />
+
+      <Stage2Cli Remove="*" />
+      <Stage2Cli Include="$(OutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(BackwardsCompatibleSharedFrameworks)"
+          DestinationFiles="@(BackwardsCompatibleSharedFrameworks->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(Stage2Cli)"
+          DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="RetargetVSTestConsole"
+          BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
+          AfterTargets="Publish">
+    <PropertyGroup>
+      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
+      <ReplacementPattern>"version": ".*"</ReplacementPattern>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
+    </PropertyGroup>
+    <ReplaceFileContents
+      InputFiles="$(VSTestRuntimeConfigPath)"
+      DestinationFiles="$(VSTestRuntimeConfigPath)"
+      ReplacementPatterns="$(ReplacementPattern)"
+      ReplacementStrings="$(ReplacementString)" />
   </Target>
 </Project>

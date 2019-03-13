@@ -96,7 +96,6 @@ dlldata.c
 # DNX
 project.lock.json
 artifacts/
-bin/
 
 *_i.c
 *_p.c
@@ -292,16 +291,11 @@ _Pvt_Extensions
 
 # Exceptions
 # Build Scripts
-!scripts/build/
 test/PackagedCommands/Consumers/*/project.json
 
 # Vim swp files
 *.swp
 *.*~
-
-# VS generated files
-launchSettings.json
-
 # user files used in tests
 !TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/TestLibrary.xproj.user
 !TestAssets/TestProjects/TestAppWithLibrary/TestApp/TestApp.xproj.user
@@ -317,3 +311,4 @@ lib/
 vendor/dotnet/
 *.exe
 vendor/toolset/
+vendor/core-sdk/

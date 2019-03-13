@@ -1,5 +1,9 @@
 # .NET Command Line Interface
 
+build:
+2.1.601-preview-009580
+App 2.1.9
+
 ### Problem:
 ```
 NuGet.targets(367,5): error MSB4062: The "NuGet.Build.Tasks.GetRestoreDotnetCliToolsTask" 
@@ -40,6 +44,34 @@ NuGet.Protocol, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e3
 NuGet.Versioning, Version=5.0.0.4, Culture=neutral, PublicKeyToken=31bf3856ad364e35     | c:\bin\dotb\NuGet.Versioning.dll
 
 ```
+
+https://dotnetcli.azureedge.net/dotnet/Runtime/1.1.2/dotnet-win-x64.1.1.2.zip
+
+[![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command and the documentation.
+
+# Looking for the .NET Core SDK tooling?
+
+If you are looking for the latest nightly of the .NET Core SDK, see https://github.com/dotnet/core-sdk.
+
+# Found an issue?
+
+[![.NET Slack Status](https://aspnetcoreslack.herokuapp.com/badge.svg?2)](http://tattoocoder.com/aspnet-slack-sign-up/) [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms and the documentation.
+
+Looking for V1 of the .NET Core tooling?
+----------------------------------------
+
+If you are looking for the v2.0 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
+
+> **Note:** the release/2.1.5xx branch of the CLI repo is based on an upcoming update of the SDK and is considered pre-release. For production-level usage, please use the
+> released version of the tools available at https://dot.net/core
+
+Found an issue?
+---------------
+
 
 https://dotnetcli.azureedge.net/dotnet/Runtime/1.1.2/dotnet-win-x64.1.1.2.zip
 

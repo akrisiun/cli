@@ -1,0 +1,6 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <CommitCount>009585</CommitCount>
+        <CommitHash>ad377b6be94fda2118ea42c47444c07680657e0b</CommitHash>
+    </PropertyGroup>
+</Project>

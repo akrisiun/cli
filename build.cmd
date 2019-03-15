@@ -8,13 +8,14 @@ REM Licensed under the MIT license. See LICENSE file in the project root for ful
 
 @REM .\run-build.ps1 -InitTools
 
-<<<<<<< HEAD
-=======
+cd .dotnet/
+.\dotnet-install.ps1 -version 2.1.500 --install-dir .
+cd ..
+
 .dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:restore
 .dotnet/dotnet msbuild build.proj /v:d /t:restore
 @REM .dotnet/dotnet msbuild build.proj /v:d /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
 @REM # 2.1.403
 @REM .dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:build
 
->>>>>>> refs/remotes/origin/osx
 .dotnet/dotnet msbuild build.proj /v:n

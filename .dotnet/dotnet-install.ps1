@@ -157,6 +157,9 @@ function Get-Machine-Architecture() {
 
 function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
     Say-Invocation $MyInvocation
+    if ($PSVersionTable.Platform -eq "Unix") {
+        return "x64"
+    }
 
     switch ($Architecture.ToLower()) {
         { $_ -eq "<auto>" } { return Get-CLIArchitecture-From-Architecture $(Get-Machine-Architecture) }
@@ -546,11 +549,16 @@ if ($isAssetInstalled) {
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
-$installDrive = $((Get-Item $InstallRoot).PSDrive.Name);
-$diskInfo = Get-PSDrive -Name $installDrive
-if ($diskInfo.Free / 1MB -le 100) {
-    Say "There is not enough disk space on drive ${installDrive}:"
-    exit 0
+if ($PSVersionTable.Platform -eq "Unix") {
+  # OK
+} else {
+  # Windows
+    $installDrive = $((Get-Item $InstallRoot).PSDrive.Name);
+    $diskInfo = Get-PSDrive -Name $installDrive
+    if ($diskInfo.Free / 1MB -le 100) {
+        Say "There is not enough disk space on drive ${installDrive}:"
+        exit 0
+    }
 }
 
 $ZipPath = [System.IO.Path]::combine([System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName())

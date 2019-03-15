@@ -8,7 +8,8 @@
     <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81</AssetTargetFallback>
     
     <VersionToolsVersion>3.0.0-preview4-03811-01</VersionToolsVersion>
-    <!--<BuildTasksFeedToolVersion>1.0.0-prerelease-01929-02</BuildTasksFeedToolVersion>
+    <BuildTasksFeedToolVersion>1.0.0-prerelease-01929-02</BuildTasksFeedToolVersion>
+    <!--
     dotnet-cli-build
     -->
   </PropertyGroup>

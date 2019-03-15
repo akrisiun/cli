@@ -45,7 +45,8 @@
 	    <dotnet>$(RepoRoot).dotnet/dotnet$(ExeExtension)</dotnet>
     </PropertyGroup>
 
-    <Exec Command="$(dotnet) restore ../../build.proj $(ExtraRestoreArgs)" 
+    <!-- ../../build.proj -->
+    <Exec Command="$(dotnet) restore $(ExtraRestoreArgs)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 

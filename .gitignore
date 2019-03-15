@@ -203,15 +203,6 @@ DocProject/Help/html
 *.pubxml
 *.publishproj
 
-# NuGet Packages
-*.nupkg
-# The packages folder can be ignored because of Package Restore
-**/packages/*
-# except build/, which is used as an MSBuild target.
-!**/packages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/packages/repositories.config
-
 # Windows Azure Build Output
 csx/
 *.build.csdef
@@ -308,6 +299,20 @@ lib/sdk/
 vendor/msbuild/
 lib/
 
+# NuGet Packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+# **/packages/*
+**/packages/*.dll
+**/packages/*.exe 
+**/*.dll
+**/*.exe
+
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+!**/packages/repositories.config
+
 *.dev.json
 vendor/dotnet/
 *.exe
@@ -317,3 +322,4 @@ vendor/app/
 vendor/DotNetCorePlugins/
 vendor/corefx/
 bin/obj/HostInfo.props
+**/*.bak

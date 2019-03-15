@@ -63,11 +63,11 @@
           Inputs="@(RestoreSrcPackagesInput)"
           Outputs="@(RestoreSrcPackagesInput->'%(RelativeDir)/obj/project.assets.json');@(RestoreSrcPackagesInput->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreSrcPackagesInput->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
 
+<!--
     <CallTarget Targets="CleanSrcLockFiles" />
-
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
-
+-->
   </Target>
 
   <Target Name="CleanSrcLockFiles" >
@@ -89,11 +89,11 @@
           Outputs="@(RestoreToolsPackagesInput->'%(RelativeDir)/obj/project.assets.json');@(RestoreToolsPackagesInput->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.props');@(RestoreToolsPackagesInput->'%(RelativeDir)/obj/%(Filename).csproj.nuget.g.targets')">
 
     <CallTarget Targets="CleanToolsLockFiles" />
-
+<!--
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;"
                    AdditionalParameters="/p:UsePortableLinuxSharedFramework=$(UsePortableLinuxSharedFramework)" />
-
+-->
   </Target>
 
   <Target Name="CleanToolsLockFiles" >

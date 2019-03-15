@@ -84,10 +84,11 @@
 
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
-
+<!--
     <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" MSBuildArgs="/p:PublishDir=$(FSharpDirectory)" />
+-->                   
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
@@ -319,10 +320,13 @@
 
     <!-- Crossgen does not support generating symbols on Mac  -->
     <PropertyGroup Condition="'$(CreateCrossgenSymbols)' == ''">
-      <CreateCrossgenSymbols>true</CreateCrossgenSymbols>
+      <CreateCrossgenSymbols>false</CreateCrossgenSymbols>
       <CreateCrossgenSymbols Condition="'$(OSName)' == 'osx'">false</CreateCrossgenSymbols>
    </PropertyGroup>
-
+   <!--
+      <CreateCrossgenSymbols>true</CreateCrossgenSymbols>
+   
+    TODO: Crossgen task was not given value for SourceAssembly
     <Crossgen
         SourceAssembly="%(RoslynTargets.FullPath)"
         DestinationPath="%(RoslynTargets.FullPath)"
@@ -351,7 +355,9 @@
         ReadyToRun="True"
         CreateSymbols="$(CreateCrossgenSymbols)"
         DiasymReaderPath="@(DiasymReaderPath)"
-        PlatformAssemblyPaths="@(PlatformAssemblies);@(RemainingFolders);$(SharedFrameworkNameVersionPath)" />
+        PlatformAssemblyPaths="@(PlatformAssemblies);@(RemainingFolders);$(SharedFrameworkNameVersionPath)" 
+        />
+        -->
   </Target>
 
   <Target Name="ChmodPublishDir"

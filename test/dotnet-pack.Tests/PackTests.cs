@@ -158,9 +158,9 @@ namespace Microsoft.DotNet.Tools.Pack.Tests
         }
 
         [Theory]
-        [InlineData("TestAppSimple")]
-        [InlineData("FSharpTestAppSimple")]
-        public void PackWorksWithLocalProject(string projectName)
+        [InlineData("C#", "TestAppSimple")]
+        [InlineData("F#", "FSharpTestAppSimple")]
+        public void PackWorksWithLocalProject(string language, string projectName)
         {
             var testInstance = TestAssets.Get(projectName)
                 .CreateInstance()

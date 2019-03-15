@@ -48,20 +48,18 @@ namespace Microsoft.DotNet.Tests.Commands
             {
                 new MockFeed
                 {
-                    Type = MockFeedType.FeedFromGlobalNugetConfig,
+                    Type = MockFeedType.FeedFromLookUpNugetConfig,
                     Packages = new List<MockFeedPackage>
                     {
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = LowerPackageVersion,
-                            ToolCommandName = "SimulatorCommand"
+                            Version = LowerPackageVersion
                         },
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = HigherPackageVersion,
-                            ToolCommandName = "SimulatorCommand"
+                            Version = HigherPackageVersion
                         }
                     }
                 }
@@ -69,7 +67,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenANonFeedExistentPackageItErrors()
+        public void GivenANonExistentPackageItErrors()
         {
             var packageId = "does.not.exist";
             var command = CreateUpdateCommand($"-g {packageId}");
@@ -78,18 +76,9 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
-                   Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
-        }
-
-        [Fact]
-        public void GivenANonExistentPackageItInstallTheLatest()
-        {
-            var command = CreateUpdateCommand($"-g {_packageId}");
-
-            command.Execute();
-
-            //_store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
-            //    .Be(HigherPackageVersion);
+                    string.Format(
+                        LocalizableStrings.ToolNotInstalled,
+                        packageId));
         }
 
         [Fact]
@@ -101,12 +90,12 @@ namespace Microsoft.DotNet.Tests.Commands
 
             command.Execute();
 
-            //_store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
-            //    .Be(HigherPackageVersion);
+            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
+                .Be(HigherPackageVersion);
         }
 
         [Fact]
-        public void GivenAnExistedLowerversionInstallationWhenCallItCanPrintSuccessMessage()
+        public void GivenAnExistedLowerversionInstallationWhenCallItCanPrintSucessMessage()
         {
             CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
             _reporter.Lines.Clear();
@@ -121,7 +110,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenAnExistedSameVersionInstallationWhenCallItCanPrintSuccessMessage()
+        public void GivenAnExistedSameVersionInstallationWhenCallItCanPrintSucessMessage()
         {
             CreateInstallCommand($"-g {_packageId} --version {HigherPackageVersion}").Execute();
             _reporter.Lines.Clear();
@@ -145,19 +134,18 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                //(location, forwardArguments) => (_store, _store,
-                //    new ToolPackageInstallerMock(
-                //        _fileSystem,
-                //        _store,
-                //        new ProjectRestorerMock(
-                //            _fileSystem,
-                //            _reporter,
-                //            _mockFeeds
-                //        ),
-                //        installCallback: () => throw new ToolConfigurationException("Simulated error")),
-                //    new ToolPackageUninstallerMock(_fileSystem, _store)),
-                //_ => GetMockedShellShimRepository(),
-                reporter: _reporter);
+                _ => (_store,
+                    new ToolPackageInstallerMock(
+                        _fileSystem,
+                        _store,
+                        new ProjectRestorerMock(
+                            _fileSystem,
+                            _reporter,
+                            _mockFeeds
+                        ),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                _ => GetMockedShellShimRepository(),
+                _reporter);
 
             Action a = () => command.Execute();
             a.ShouldThrow<GracefulException>().And.Message.Should().Contain(
@@ -175,24 +163,23 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                //(location, forwardArguments) => (_store, _store,
-                //    new ToolPackageInstallerMock(
-                //        _fileSystem,
-                //        _store,
-                //        new ProjectRestorerMock(
-                //            _fileSystem,
-                //            _reporter,
-                //            _mockFeeds
-                //        ),
-                //        installCallback: () => throw new ToolConfigurationException("Simulated error")),
-                //    new ToolPackageUninstallerMock(_fileSystem, _store)),
-                //_ => GetMockedShellShimRepository(),
-                reporter: _reporter);
+                _ => (_store,
+                    new ToolPackageInstallerMock(
+                        _fileSystem,
+                        _store,
+                        new ProjectRestorerMock(
+                            _fileSystem,
+                            _reporter,
+                            _mockFeeds
+                        ),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                _ => GetMockedShellShimRepository(),
+                _reporter);
 
             Action a = () => command.Execute();
 
-            //_store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
-            //    .Be(LowerPackageVersion);
+            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
+                .Be(LowerPackageVersion);
         }
 
         [Fact]
@@ -219,14 +206,14 @@ namespace Microsoft.DotNet.Tests.Commands
                     LocalizableStrings.UpdateToolCommandNeedGlobalOrToolPath);
         }
 
-        private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
+        private ToolInstallCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
 
-            return new ToolInstallGlobalOrToolPathCommand(
+            return new ToolInstallCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
-                (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
+                (_) => (_store, new ToolPackageInstallerMock(
                     _fileSystem,
                     _store,
                     new ProjectRestorerMock(
@@ -246,17 +233,16 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                //(location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
-                //    _fileSystem,
-                //    _store,
-                //    new ProjectRestorerMock(
-                //        _fileSystem,
-                //        _reporter,
-                //        _mockFeeds
-                //    )),
-                //    new ToolPackageUninstallerMock(_fileSystem, _store)),
-                //(_) => GetMockedShellShimRepository(),
-                reporter: _reporter);
+                (_) => (_store, new ToolPackageInstallerMock(
+                    _fileSystem,
+                    _store,
+                    new ProjectRestorerMock(
+                        _fileSystem,
+                        _reporter,
+                        _mockFeeds
+                    ))),
+                (_) => GetMockedShellShimRepository(),
+                _reporter);
         }
 
         private ShellShimRepository GetMockedShellShimRepository()

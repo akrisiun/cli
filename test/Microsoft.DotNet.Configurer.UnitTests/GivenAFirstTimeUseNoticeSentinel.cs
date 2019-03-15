@@ -82,9 +82,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         [Fact]
         public void ItDoesNotCreateTheSentinelAgainIfItAlreadyExistsInTheDotnetUserProfileFolderPath()
         {
-            const string contentToValidateSentinelWasNotReplaced = "some string";
+            const string contentToValidateSentinalWasNotReplaced = "some string";
             var sentinel = Path.Combine(DOTNET_USER_PROFILE_FOLDER_PATH, FirstTimeUseNoticeSentinel.SENTINEL);
-            _fileSystemMockBuilder.AddFile(sentinel, contentToValidateSentinelWasNotReplaced);
+            _fileSystemMockBuilder.AddFile(sentinel, contentToValidateSentinalWasNotReplaced);
 
             var fileSystemMock = _fileSystemMockBuilder.Build();
 
@@ -98,14 +98,14 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             firstTimeUseNoticeSentinel.CreateIfNotExists();
 
-            fileSystemMock.File.ReadAllText(sentinel).Should().Be(contentToValidateSentinelWasNotReplaced);
+            fileSystemMock.File.ReadAllText(sentinel).Should().Be(contentToValidateSentinalWasNotReplaced);
         }
 
         [Fact]
         public void ItCreatesTheDotnetUserProfileFolderIfItDoesNotExistAlreadyWhenCreatingTheSentinel()
         {
             var fileSystemMock = _fileSystemMockBuilder.Build();
-            var directoryMock = new DirectoryMockWithSpy(fileSystemMock.Directory);
+            var directoryMock = new DirectoryMock();
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void ItDoesNotAttemptToCreateTheDotnetUserProfileFolderIfItAlreadyExistsWhenCreatingTheSentinel()
         {
             var fileSystemMock = _fileSystemMockBuilder.Build();
-            var directoryMock = new DirectoryMockWithSpy(fileSystemMock.Directory, new List<string> { DOTNET_USER_PROFILE_FOLDER_PATH });
+            var directoryMock = new DirectoryMock(new List<string> { DOTNET_USER_PROFILE_FOLDER_PATH });
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
@@ -134,28 +134,20 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             directoryMock.CreateDirectoryInvoked.Should().BeFalse();
         }
 
-        private class DirectoryMockWithSpy : IDirectory
+        private class DirectoryMock : IDirectory
         {
-            private readonly IDirectory _directorySystem;
+            private IList<string> _directories;
 
             public bool CreateDirectoryInvoked { get; set; }
 
-            public DirectoryMockWithSpy(IDirectory directorySystem, IList<string> directories = null)
+            public DirectoryMock(IList<string> directories = null)
             {
-                if (directorySystem != null) _directorySystem = directorySystem;
-
-                if (directories != null)
-                {
-                    foreach (var directory in directories)
-                    {
-                        _directorySystem.CreateDirectory(directory);
-                    }
-                }
+                _directories = directories ?? new List<string>();
             }
 
             public bool Exists(string path)
             {
-                return _directorySystem.Exists(path);
+                return _directories.Any(d => d == path);
             }
 
             public ITemporaryDirectory CreateTemporaryDirectory()
@@ -163,7 +155,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<string> EnumerateFiles(string path)
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
             {
                 throw new NotImplementedException();
             }
@@ -178,14 +170,14 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public string GetCurrentDirectory()
+            public string GetDirectoryFullName(string path)
             {
                 throw new NotImplementedException();
             }
 
             public void CreateDirectory(string path)
             {
-                _directorySystem.CreateDirectory(path);
+                _directories.Add(path);
                 CreateDirectoryInvoked = true;
             }
 

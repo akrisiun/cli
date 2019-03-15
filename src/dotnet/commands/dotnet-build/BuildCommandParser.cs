@@ -24,21 +24,20 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                          .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
-                    LocalizableStrings.NoIncrementalOptionDescription),
+                    LocalizableStrings.NoIncrementialOptionDescription),
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,
                     Accept.NoArguments()
                           .ForwardAs("-property:BuildProjectReferences=false")),
                 CommonOptions.NoRestoreOption(),
-                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.VerbosityOption());
     }
 }

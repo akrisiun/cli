@@ -20,7 +20,6 @@
     <MakeDir Directories="$(TestPackagesDir)" />
     
     <ItemGroup>
-      <!--
       <ProjectsToTest Include="build/test/RunTest.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
@@ -34,7 +33,6 @@
           WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity)))
         </Properties>
       </ProjectsToTest>
-      -->
     </ItemGroup>
 
     <Message Text="Starting test execution" Importance="High" />

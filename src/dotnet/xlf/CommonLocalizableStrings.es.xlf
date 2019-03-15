@@ -1,12 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../CommonLocalizableStrings.resx">
     <body>
-      <trans-unit id="CommandInteractiveOptionDescription">
-        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
         <target state="translated">No se encuentra ningún proyecto en "{0}".</target>
@@ -728,16 +723,17 @@ You can add it to the current session by running the following command:
 export PATH="$PATH:{0}"
 </source>
         <target state="translated">El directorio de herramientas "{0}" no está actualmente en la variable de entorno PATH.
-Si usa bash, puede agregarlo a su perfil ejecutando el comando siguiente:
+Si usa bash, puede agregarlo a su perfil mediante la ejecución de comando siguiente:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Puede agregarlo a su perfil ejecutando el comando siguiente:
+Puede agregarlo a la sesión actual mediante la ejecución del comando siguiente:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXManualInstructions">
@@ -753,17 +749,18 @@ You can add it to the current session by running the following command:
 
 export PATH="$PATH:{0}"
 </source>
-        <target state="translated">El directorio de herramientas "{0}" no está en la variable de entorno PATH.
-Si está utilizando bash, se puede agregar a su perfil ejecutando el siguiente comando:
+        <target state="translated">El directorio de herramientas "{0}" no está actualmente en la variable de entorno PATH.
+Si usa bash, puede agregarlo a su perfil mediante la ejecución de comando siguiente:
 
 cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
 # Add .NET Core SDK tools
 export PATH="$PATH:{0}"
 EOF
 
-Puede agregarlo a la sesión actual ejecutando el siguiente comando:
+Puede agregarlo a la sesión actual mediante la ejecución del comando siguiente:
 
-export PATH="$PATH:{0}"</target>
+export PATH="$PATH:{0}"
+</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsManualInstructions">
@@ -896,14 +893,9 @@ setx PATH "%PATH%;{0}"
         <target state="translated">SUFIJO_DE_VERSIÓN</target>
         <note />
       </trans-unit>
-      <trans-unit id="SolutionOrProjectArgumentDescription">
-        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">El archivo de proyecto o solución donde operar. Si no se especifica un archivo, el comando buscará uno en el directorio actual.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SolutionOrProjectArgumentName">
-        <source>PROJECT | SOLUTION</source>
-        <target state="translated">PROYECTO | SOLUCIÓN</target>
+      <trans-unit id="CommandInteractiveOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
         <note />
       </trans-unit>
     </body>

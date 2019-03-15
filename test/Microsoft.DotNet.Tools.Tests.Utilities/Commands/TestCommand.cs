@@ -23,8 +23,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public Process CurrentProcess { get; private set; }
 
-        public int TimeoutMiliseconds { get; set; } = Timeout.Infinite;
-
         public Dictionary<string, string> Environment { get; } = new Dictionary<string, string>();
 
         public event DataReceivedEventHandler ErrorDataReceived;
@@ -117,10 +115,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             await completionTask;
 
-            if (!CurrentProcess.WaitForExit(TimeoutMiliseconds))
-            {
-                throw new TimeoutException($"The process failed to exit after {TimeoutMiliseconds / 1000.0} seconds.");
-            }
+            CurrentProcess.WaitForExit();
 
             RemoveNullTerminator(stdOut);
 
@@ -188,7 +183,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string GetBaseDirectory()
         {
+#if NET451
+            return AppDomain.CurrentDomain.BaseDirectory;
+#else
             return AppContext.BaseDirectory;
+#endif
         }
 
         private void ResolveCommand(ref string executable, ref string args)
@@ -204,11 +203,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 args = newArgs;
 
-                executable = DotnetUnderTest.FullName;
+                executable = new Muxer().MuxerPath;
             }
             else if ( executable == "dotnet")
             {
-                executable = DotnetUnderTest.FullName;
+                executable = new Muxer().MuxerPath;
             }
             else if (!Path.IsPathRooted(executable))
             {
@@ -221,7 +220,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             foreach (var name in _cliGeneratedEnvironmentVariables)
             {
+#if NET451
+                psi.EnvironmentVariables.Remove(name);
+#else
                 psi.Environment.Remove(name);
+#endif
             }
         }
 
@@ -231,11 +234,15 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             foreach (var item in Environment)
             {
+#if NET451
+                psi.EnvironmentVariables[item.Key] = item.Value;
+#else
                 psi.Environment[item.Key] = item.Value;
+#endif
             }
 
             //  Flow the TEST_PACKAGES environment variable to the child process
-            psi.Environment["TEST_PACKAGES"] = new RepoDirectoriesProvider().TestPackages;
+            psi.Environment["TEST_PACKAGES"] = System.Environment.GetEnvironmentVariable("TEST_PACKAGES");
         }
 
         private void AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows()

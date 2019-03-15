@@ -31,13 +31,25 @@ namespace Microsoft.DotNet.Tools.Help
 
             result.ShowHelpIfRequested();
 
-            if (helpAppliedOption.Arguments.Any())
+            HelpCommand cmd;
+            try
             {
-                return new HelpCommand(helpAppliedOption).Execute();
+                cmd = new HelpCommand(helpAppliedOption);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
             }
 
-            PrintHelp();
-            return 0;
+            if (helpAppliedOption.Arguments.Any())
+            {
+                return cmd.Execute();
+            }
+            else
+            {
+                PrintHelp();
+                return 0;
+            }
         }
 
         public static void PrintHelp()
@@ -110,3 +122,4 @@ namespace Microsoft.DotNet.Tools.Help
         }
     }
 }
+

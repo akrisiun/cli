@@ -293,7 +293,7 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void InternalreportinstallsuccessCommandIsRegisteredInBuiltIn()
+        public void InternalreportinstallsuccessCommandIsRegistedInBuiltIn()
         {
             BuiltInCommandsCatalog.Commands.Should().ContainKey("internal-reportinstallsuccess");
         }

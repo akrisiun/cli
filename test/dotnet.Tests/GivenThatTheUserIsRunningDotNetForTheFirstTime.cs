@@ -87,6 +87,14 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
+        public void ItCreatesASentinelFileUnderTheNuGetCacheFolder()
+        {
+            _nugetFallbackFolder
+                .Should()
+                .HaveFile($"{GetDotnetVersion()}.dotnetSentinel");
+    	}
+
+        [Fact]
         public void ItCreatesAFirstUseSentinelFileUnderTheDotDotNetFolder()
         {
             _dotDotnetFolder
@@ -121,14 +129,13 @@ namespace Microsoft.DotNet.Tests
             // Disable to prevent the creation of the .dotnet folder by optimizationdata.
             command.Environment["DOTNET_DISABLE_MULTICOREJIT"] = "true";
             command.Environment["SkipInvalidConfigurations"] = "true";
-            // Disable telemetry to prevent the creation of the .dotnet folder
-            // for machineid and docker cache files
-            command.Environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "true";
 
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
             var homeFolder = new DirectoryInfo(Path.Combine(emptyHome, ".dotnet"));
-            homeFolder.Should().NotExist();
+            string[] fileEntries = Directory.GetFiles(homeFolder.ToString());
+            fileEntries.Should().OnlyContain(x => !x.Contains(".dotnetFirstUseSentinel"));
+            fileEntries.Should().OnlyContain(x => !x.Contains(".aspNetCertificateSentinel"));
         }
 
         [Fact]
@@ -190,7 +197,7 @@ namespace Microsoft.DotNet.Tests
         [LinuxOnlyFact]
         public void ItCreatesTheProfileFileOnLinuxWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_profile_on_linux");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
             var profiled = Path.Combine(_testDirectory, "profile.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
@@ -212,7 +219,7 @@ namespace Microsoft.DotNet.Tests
         [MacOsOnlyFact]
         public void ItCreatesThePathDFileOnMacOSWhenInvokedFromNativeInstaller()
         {
-            var emptyHome = Path.Combine(_testDirectory, "empty_home_for_pathd");
+            var emptyHome = Path.Combine(_testDirectory, "empty_home");
             var pathsd = Path.Combine(_testDirectory, "paths.d");
 
             var command = new DotnetCommand().WithWorkingDirectory(_testDirectory);
@@ -228,6 +235,35 @@ namespace Microsoft.DotNet.Tests
 
             File.Exists(pathsd).Should().BeTrue();
             File.ReadAllText(pathsd).Should().Be(CliFolderPathCalculator.ToolsShimPathInUnix.PathWithTilde);
+        }
+
+        [Fact]
+        public void ItRestoresTheNuGetPackagesToTheNuGetCacheFolder()
+        {
+            List<string> expectedDirectories = new List<string>()
+            {
+                "microsoft.netcore.app",
+                "microsoft.netcore.platforms",
+                "netstandard.library",
+                "microsoft.aspnetcore.diagnostics",
+                "microsoft.aspnetcore.mvc",
+                "microsoft.aspnetcore.routing",
+                "microsoft.aspnetcore.server.iisintegration",
+                "microsoft.aspnetcore.server.kestrel",
+                "microsoft.aspnetcore.staticfiles",
+                "microsoft.extensions.configuration.environmentvariables",
+                "microsoft.extensions.configuration.json",
+                "microsoft.extensions.logging",
+                "microsoft.extensions.logging.console",
+                "microsoft.extensions.logging.debug",
+                "microsoft.extensions.options.configurationextensions",
+                //BrowserLink has been temporarily disabled until https://github.com/dotnet/templating/issues/644 is resolved
+                //"microsoft.visualstudio.web.browserlink",
+            };
+
+            _nugetFallbackFolder
+                .Should()
+                .HaveDirectories(expectedDirectories);
         }
 
         private string GetDotnetVersion()

@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdSettingsDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdSettingsFile)
-                              .ForwardAsSingle(o => $"-property:VSTestSetting={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                              .ForwardAsSingle(o => $"-property:VSTestSetting={o.Arguments.Single()}")),
                   Create.Option(
                         "-t|--list-tests",
                         LocalizableStrings.CmdListTestsDescription,
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdTestAdapterPathDescription,
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.CmdTestAdapterPath)
-                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Arguments.Select(CommandDirectoryContext.GetFullPath))}\"")),
+                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Arguments)}\"")),
                   Create.Option(
                         "-l|--logger",
                         LocalizableStrings.CmdLoggerDescription,
@@ -56,19 +56,18 @@ namespace Microsoft.DotNet.Cli
                                     })),
                   CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                   CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
-                  CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription, withShortOption: false),
                   Create.Option(
                         "-o|--output",
                         LocalizableStrings.CmdOutputDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdOutputDir)
-                              .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                              .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
                   Create.Option(
                         "-d|--diag",
                         LocalizableStrings.CmdPathTologFileDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToLogFile)
-                              .ForwardAsSingle(o => $"-property:VSTestDiag={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                              .ForwardAsSingle(o => $"-property:VSTestDiag={o.Arguments.Single()}")),
                   Create.Option(
                         "--no-build",
                         LocalizableStrings.CmdNoBuildDescription,
@@ -79,7 +78,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdResultsDirectoryDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToResultsDirectory)
-                              .ForwardAsSingle(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                              .ForwardAsSingle(o => $"-property:VSTestResultsDirectory={o.Arguments.Single()}")),
                   Create.Option(
                         "--collect",
                         LocalizableStrings.cmdCollectDescription,
@@ -91,16 +90,10 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdBlameDescription,
                         Accept.NoArguments()
                               .ForwardAsSingle(o => "-property:VSTestBlame=true")),
-                  Create.Option(
-                        "--nologo|/nologo",
-                        LocalizableStrings.CmdNoLogo,
-                        Accept.NoArguments()
-                              .ForwardAsSingle(o => "-property:VSTestNoLogo=nologo")),
                   CommonOptions.NoRestoreOption(),
-                  CommonOptions.InteractiveMsBuildForwardOption(),
                   CommonOptions.VerbosityOption());
 
-        private static string GetSemiColonEscapedstring(string arg)
+        private static string GetSemiColonEsacpedstring(string arg)
         {
             if (arg.IndexOf(";") != -1)
             {
@@ -117,7 +110,7 @@ namespace Microsoft.DotNet.Cli
 
             foreach (string arg in args)
             {
-                array[counter++] = GetSemiColonEscapedstring(arg);
+                array[counter++] = GetSemiColonEsacpedstring(arg);
             }
 
             return array;

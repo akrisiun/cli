@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
-#if NETFRAMEWORK
+#if NET46
 using Microsoft.VisualStudio.Setup.Configuration;
 #endif
 
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         private VSSettings()
         {
-#if NETFRAMEWORK
+#if NET46
             if (!Interop.RunningOnWindows)
             {
                 return;

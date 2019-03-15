@@ -43,9 +43,19 @@ namespace Microsoft.DotNet.Tools.Migrate
 
             DebugHelper.HandleDebugSwitch(ref args);
 
+            MigrateCommand.MigrateCommand cmd;
             try
             {
-                return FromArgs(args).Execute();
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            try
+            {
+                return cmd.Execute();
             }
             catch (GracefulException e)
             {

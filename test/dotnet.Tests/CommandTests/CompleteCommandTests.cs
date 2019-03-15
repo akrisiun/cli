@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenOnlyDotnetItSuggestsTopLevelCommandsAndOptions()
         {
-            var expected = new[] {
+            var expected = new string[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenASlashItSuggestsTopLevelOptions()
         {
-            var expected = new[] {
+            var expected = new string[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -74,11 +74,10 @@ namespace Microsoft.DotNet.Tests.Commands
             reporter.Lines.Should().Equal(expected.OrderBy(c => c));
         }
 
-        [Fact(Skip = "https://github.com/dotnet/cli/issues/9737")]
+        [Fact]
         public void GivenNewCommandItDisplaysCompletions()
         {
-            var expected = new[] {
-                "--dry-run",
+            var expected = new string[] {
                 "--force",
                 "--help",
                 "--install",
@@ -106,7 +105,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
-            var expected = new[] {
+            var expected = new string[] {
                 "--help",
                 "--verbosity",
                 "--version",
@@ -125,7 +124,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetDeleteCommandItDisplaysCompletions()
         {
-            var expected = new[] {
+            var expected = new string[] {
                 "--api-key",
                 "--force-english-output",
                 "--help",
@@ -146,7 +145,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetLocalsCommandItDisplaysCompletions()
         {
-            var expected = new[] {
+            var expected = new string[] {
                 "--clear",
                 "--force-english-output",
                 "--help",

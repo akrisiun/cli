@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.CommandFactory;
 using NuGet.Frameworks;
 
 namespace Microsoft.DotNet.Cli
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Cli
                 return new BuiltInCommand(commandName, args, builtInCommand.Command);
             }
 
-            return CommandFactoryUsingResolver.CreateDotNet(commandName, args, framework, configuration);
+            return Command.CreateDotNet(commandName, args, framework, configuration);
         }
     }
 }

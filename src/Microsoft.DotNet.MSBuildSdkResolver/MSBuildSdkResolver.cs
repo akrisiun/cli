@@ -81,9 +81,12 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
                 if (netcoreSdkDir == null)
                 {
-                    return Failure(
-                        factory,
-                        Strings.UnableToLocateNETCoreSdk);
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            "Unable to locate the .NET Core SDK. Check that it is installed and that the version"
+                            + " specified in global.json (if any) matches the installed version."
+                        });
                 }
 
                 msbuildSdksDir = Path.Combine(netcoreSdkDir, "Sdks");
@@ -91,32 +94,39 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
                 if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, sdkReference.MinimumVersion))
                 {
-                    return Failure(
-                        factory,
-                        Strings.NETCoreSDKSmallerThanMinimumRequestedVersion,
-                        netcoreSdkVersion,
-                        sdkReference.MinimumVersion);
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK is smaller than the minimum version"
+                            + $" {sdkReference.MinimumVersion} requested. Check that a recent enough .NET Core SDK is"
+                            + " installed, increase the minimum version specified in the project, or increase"
+                            + " the version specified in global.json."
+                        });
                 }
 
                 Version minimumMSBuildVersion = GetMinimumMSBuildVersion(netcoreSdkDir);
                 if (context.MSBuildVersion < minimumMSBuildVersion)
                 {
-                    return Failure(
-                        factory,
-                        Strings.MSBuildSmallerThanMinimumVersion,
-                        netcoreSdkVersion,
-                        minimumMSBuildVersion,
-                        context.MSBuildVersion);
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK requires at least version {minimumMSBuildVersion.ToString()}"
+                            + $" of MSBuild. The current available version of MSBuild is {context.MSBuildVersion.ToString()}."
+                            + " Change the .NET Core SDK specified in global.json to an older version that requires the MSBuild"
+                            + " version currently available."
+                        });
                 }
 
                 string minimumVSDefinedSDKVersion = GetMinimumVSDefinedSDKVersion();
                 if (IsNetCoreSDKSmallerThanTheMinimumVersion(netcoreSdkVersion, minimumVSDefinedSDKVersion))
                 {
-                    return Failure(
-                        factory,
-                        Strings.NETCoreSDKSmallerThanMinimumVersionRequiredByVisualStudio,
-                        netcoreSdkVersion,
-                        minimumVSDefinedSDKVersion);
+                    return factory.IndicateFailure(
+                        new[]
+                        {
+                            $"Version {netcoreSdkVersion} of the .NET Core SDK is smaller than the minimum version"
+                            + $" {minimumVSDefinedSDKVersion} required by Visual Studio. Check that a recent enough"
+                            + " .NET Core SDK is installed or increase the version specified in global.json."
+                        });
                 }
             }
 
@@ -129,18 +139,15 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             string msbuildSdkDir = Path.Combine(msbuildSdksDir, sdkReference.Name, "Sdk");
             if (!Directory.Exists(msbuildSdkDir))
             {
-                return Failure(
-                    factory,
-                    Strings.MSBuildSDKDirectoryNotFound,
-                    msbuildSdkDir);
+                return factory.IndicateFailure(
+                    new[] 
+                    {
+                        $"{msbuildSdkDir} not found. Check that a recent enough .NET Core SDK is installed"
+                        + " and/or increase the version specified in global.json."
+                    });
             }
 
             return factory.IndicateSuccess(msbuildSdkDir, netcoreSdkVersion);
-        }
-
-        private static SdkResult Failure(SdkResultFactory factory, string format, params object[] args)
-        {
-            return factory.IndicateFailure(new[] { string.Format(format, args) });
         }
 
         private sealed class CompatibleSdkKey : IEquatable<CompatibleSdkKey>
@@ -170,7 +177,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 int h1 = DotnetExeDirectory.GetHashCode();
                 int h2 = MSBuildVersion.GetHashCode();
-                return unchecked(((h1 << 5) + h1) ^ h2);
+                return ((h1 << 5) + h1) ^ h2;
             }
         }
 

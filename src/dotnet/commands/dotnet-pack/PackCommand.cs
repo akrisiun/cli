@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.Tools.Pack
             result.ShowHelpOrErrorIfAppropriate();
 
             var parsedPack = result["dotnet"]["pack"];
-
+          
             var msbuildArgs = new List<string>()
             {
                 "-target:pack"
@@ -57,7 +57,17 @@ namespace Microsoft.DotNet.Tools.Pack
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromArgs(args).Execute();
+            PackCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+
+            return cmd.Execute();
         }
     }
 }

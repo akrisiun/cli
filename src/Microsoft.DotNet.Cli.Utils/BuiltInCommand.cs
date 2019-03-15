@@ -155,6 +155,14 @@ namespace Microsoft.DotNet.Cli.Utils
             }
         }
 
+        public CommandResolutionStrategy ResolutionStrategy
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public ICommand CaptureStdErr()
         {
             _stdErr.Capture();

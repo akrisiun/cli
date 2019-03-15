@@ -30,8 +30,7 @@ def platformList = [
   'Windows_NT:x64:Release',
   'Windows_NT:x86:Debug',
   'Windows_NT_ES:x64:Debug',
-  'Windows_NT_NoSuffix:x64:Release',
-  'Windows_NT:arm:Debug'
+  'Windows_NT_NoSuffix:x64:Release'
 ]
 
 def static getBuildJobName(def configuration, def os, def architecture) {
@@ -64,10 +63,6 @@ ${buildCommand}
 set DropSuffix=true
 ${buildCommand}
 """
-        }
-
-        if (architecture == "arm") {
-          buildCommand = """${buildCommand} /p:CLIBUILD_SKIP_TESTS=true"""
         }
     }
     else if (os == 'Windows_2016') {

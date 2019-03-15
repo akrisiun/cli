@@ -18,10 +18,6 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
-                    "--local",
-                    LocalizableStrings.ToolPathOptionName,
-                    Accept.NoArguments()),
-                Create.Option(
                     "--tool-path",
                     LocalizableStrings.ToolPathOptionDescription,
                     Accept.ExactlyOneArgument()

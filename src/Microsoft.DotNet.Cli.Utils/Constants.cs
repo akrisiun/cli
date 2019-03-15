@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
-        public static readonly string DotConfigDirectoryName = ".config";
         public static readonly string ExeSuffix = CurrentPlatform == Platform.Windows ? ".exe" : string.Empty;
 
         public static readonly string BinDirectoryName = "bin";
@@ -24,11 +23,5 @@ namespace Microsoft.DotNet.Cli.Utils
         public static readonly string ProjectArgumentName = "<PROJECT>";
         public static readonly string SolutionArgumentName = "<SLN_FILE>";
         public static readonly string ToolPackageArgumentName = "<PACKAGE_ID>";
-
-        public static readonly string AnyRid = "any";
-
-        public static readonly string RestoreInteractiveOption= "--interactive";
-        public const string MsBuildInteractivePropertyName = "NuGetInteractive";
-        public static readonly string MsBuildInteractiveOption= $"-property:{MsBuildInteractivePropertyName}=true";
     }
 }

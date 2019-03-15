@@ -8,7 +8,6 @@ using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
-using Microsoft.Extensions.EnvironmentAbstractions;
 using Moq;
 using Xunit;
 
@@ -16,7 +15,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 {
     public class OsxEnvironmentPathTests
     {
-        [NonWindowsOnlyFact]
+        [Fact]
         public void GivenPathNotSetItPrintsManualInstructions()
         {
             var reporter = new BufferedReporter();
@@ -42,7 +41,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
                     toolsPath.Path));
         }
 
-        [NonWindowsOnlyFact]
+        [Fact]
         public void GivenPathNotSetAndProfileExistsItPrintsReopenMessage()
         {
             var reporter = new BufferedReporter();
@@ -68,10 +67,10 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().Equal(CommonLocalizableStrings.EnvironmentPathOSXNeedReopen);
         }
 
-        [NonWindowsOnlyTheory]
+        [Theory]
         [InlineData("/home/user/.dotnet/tools")]
         [InlineData("~/.dotnet/tools")]
-        public void GivenPathSetItPrintsNothing(string toolsDirectoryOnPath)
+        public void GivenPathSetItPrintsNothing(string toolsDiretoryOnPath)
         {
             var reporter = new BufferedReporter();
             var toolsPath = new BashPathUnderHomeDirectory("/home/user", ".dotnet/tools");
@@ -80,7 +79,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
-                .Returns(pathValue + ":" + toolsDirectoryOnPath);
+                .Returns(pathValue + ":" + toolsDiretoryOnPath);
 
             var environmentPath = new OSXEnvironmentPath(
                 toolsPath,
@@ -93,7 +92,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
             reporter.Lines.Should().BeEmpty();
         }
 
-        [NonWindowsOnlyFact]
+        [Fact]
         public void GivenPathSetItDoesNotAddPathToEnvironment()
         {
             var reporter = new BufferedReporter();
@@ -122,15 +121,14 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 .Be(false);
         }
 
-        [NonWindowsOnlyFact]
+        [Fact]
         public void GivenPathNotSetItAddsToEnvironment()
         {
             var reporter = new BufferedReporter();
             var toolsPath = new BashPathUnderHomeDirectory("/home/user", ".dotnet/tools");
             var pathValue = @"/usr/bin";
             var provider = new Mock<IEnvironmentProvider>(MockBehavior.Strict);
-            IFileSystem fileSystem = new FileSystemMockBuilder().Build();
-            fileSystem.Directory.CreateDirectory("/etc/paths.d");
+            var fileSystem = new FileSystemMockBuilder().Build().File;
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
@@ -140,14 +138,13 @@ namespace Microsoft.DotNet.ShellShim.Tests
                 toolsPath,
                 reporter,
                 provider.Object,
-                fileSystem.File);
+                fileSystem);
 
             environmentPath.AddPackageExecutablePathToUserPath();
 
             reporter.Lines.Should().BeEmpty();
 
             fileSystem
-                .File
                 .ReadAllText(OSXEnvironmentPath.DotnetCliToolsPathsDPath)
                 .Should()
                 .Be(toolsPath.PathWithTilde);

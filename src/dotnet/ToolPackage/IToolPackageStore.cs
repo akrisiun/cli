@@ -19,5 +19,11 @@ namespace Microsoft.DotNet.ToolPackage
         DirectoryPath GetRootPackageDirectory(PackageId packageId);
 
         DirectoryPath GetPackageDirectory(PackageId packageId, NuGetVersion version);
+
+        IEnumerable<IToolPackage> EnumeratePackages();
+
+        IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId);
+
+        IToolPackage GetPackage(PackageId packageId, NuGetVersion version);
     }
 }

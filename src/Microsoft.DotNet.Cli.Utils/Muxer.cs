@@ -45,7 +45,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static string GetDataFromAppDomain(string propertyName)
         {
-            return AppContext.GetData(propertyName) as string;
+            var appDomainType = typeof(object).GetTypeInfo().Assembly?.GetType("System.AppDomain");
+            var currentDomain = appDomainType?.GetProperty("CurrentDomain")?.GetValue(null);
+            var deps = appDomainType?.GetMethod("GetData")?.Invoke(currentDomain, new[] { propertyName });
+
+            return deps as string;
         }
 
         private bool TryResolveMuxerFromParentDirectories()

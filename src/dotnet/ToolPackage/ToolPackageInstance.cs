@@ -1,6 +1,3 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
 using System.IO;
 using System.Linq;
@@ -18,15 +15,6 @@ namespace Microsoft.DotNet.ToolPackage
     // This is named "ToolPackageInstance" because "ToolPackage" would conflict with the namespace
     internal class ToolPackageInstance : IToolPackage
     {
-        public static ToolPackageInstance CreateFromAssetFile(PackageId id, DirectoryPath assetsJsonParentDirectory)
-        {
-            var lockFile = new LockFileFormat().Read(assetsJsonParentDirectory.WithFile(AssetsFileName).Value);
-            var packageDirectory = new DirectoryPath(lockFile.PackageFolders[0].Path);
-            var library = FindLibraryInLockFile(lockFile, id);
-            var version = library.Version;
-
-            return new ToolPackageInstance(id, version, packageDirectory, assetsJsonParentDirectory);
-        }
         private const string PackagedShimsDirectoryConvention = "shims";
 
         public IEnumerable<string> Warnings => _toolConfiguration.Value.Warnings;
@@ -37,7 +25,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         public DirectoryPath PackageDirectory { get; private set; }
 
-        public IReadOnlyList<RestoredCommand> Commands
+        public IReadOnlyList<CommandSettings> Commands
         {
             get
             {
@@ -56,34 +44,87 @@ namespace Microsoft.DotNet.ToolPackage
         private const string AssetsFileName = "project.assets.json";
         private const string ToolSettingsFileName = "DotnetToolSettings.xml";
 
-        private Lazy<IReadOnlyList<RestoredCommand>> _commands;
+        private IToolPackageStore _store;
+        private Lazy<IReadOnlyList<CommandSettings>> _commands;
         private Lazy<ToolConfiguration> _toolConfiguration;
-        private Lazy<LockFile> _lockFile;
         private Lazy<IReadOnlyList<FilePath>> _packagedShims;
 
-        public ToolPackageInstance(PackageId id,
+        public ToolPackageInstance(
+            IToolPackageStore store,
+            PackageId id,
             NuGetVersion version,
-            DirectoryPath packageDirectory,
-            DirectoryPath assetsJsonParentDirectory)
+            DirectoryPath packageDirectory)
         {
-            _commands = new Lazy<IReadOnlyList<RestoredCommand>>(GetCommands);
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
             _packagedShims = new Lazy<IReadOnlyList<FilePath>>(GetPackagedShims);
 
             Id = id;
             Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
             _toolConfiguration = new Lazy<ToolConfiguration>(GetToolConfiguration);
-            _lockFile =
-                new Lazy<LockFile>(
-                    () => new LockFileFormat().Read(assetsJsonParentDirectory.WithFile(AssetsFileName).Value));
         }
 
-        private IReadOnlyList<RestoredCommand> GetCommands()
+        public void Uninstall()
+        {
+            var rootDirectory = PackageDirectory.GetParentPath();
+            string tempPackageDirectory = null;
+
+            TransactionalAction.Run(
+                action: () =>
+                {
+                    try
+                    {
+                        if (Directory.Exists(PackageDirectory.Value))
+                        {
+                            // Use the staging directory for uninstall
+                            // This prevents cross-device moves when temp is mounted to a different device
+                            var tempPath = _store.GetRandomStagingDirectory().Value;
+                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(PackageDirectory.Value, tempPath));
+                            tempPackageDirectory = tempPath;
+                        }
+
+                        if (Directory.Exists(rootDirectory.Value) &&
+                            !Directory.EnumerateFileSystemEntries(rootDirectory.Value).Any())
+                        {
+                            Directory.Delete(rootDirectory.Value, false);
+                        }
+                    }
+                    catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
+                    {
+                        throw new ToolPackageException(
+                            string.Format(
+                                CommonLocalizableStrings.FailedToUninstallToolPackage,
+                                Id,
+                                ex.Message),
+                            ex);
+                    }
+                },
+                commit: () =>
+                {
+                    if (tempPackageDirectory != null)
+                    {
+                        Directory.Delete(tempPackageDirectory, true);
+                    }
+                },
+                rollback: () =>
+                {
+                    if (tempPackageDirectory != null)
+                    {
+                        Directory.CreateDirectory(rootDirectory.Value);
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempPackageDirectory, PackageDirectory.Value));
+                    }
+                });
+        }
+
+        private IReadOnlyList<CommandSettings> GetCommands()
         {
             try
             {
-                var commands = new List<RestoredCommand>();
-                LockFileTargetLibrary library = FindLibraryInLockFile(_lockFile.Value);
+                var commands = new List<CommandSettings>();
+                LockFile lockFile = new LockFileFormat().Read(PackageDirectory.WithFile(AssetsFileName).Value);
+                LockFileTargetLibrary library = FindLibraryInLockFile(lockFile);
+
                 ToolConfiguration configuration = _toolConfiguration.Value;
                 LockFileItem entryPointFromLockFile = FindItemInTargetLibrary(library, configuration.ToolAssemblyEntryPoint);
                 if (entryPointFromLockFile == null)
@@ -96,8 +137,8 @@ namespace Microsoft.DotNet.ToolPackage
                 }
 
                 // Currently only "dotnet" commands are supported
-                commands.Add(new RestoredCommand(
-                    new ToolCommandName(configuration.CommandName),
+                commands.Add(new CommandSettings(
+                    configuration.CommandName,
                     "dotnet",
                     LockFileRelativePathToFullFilePath(entryPointFromLockFile.Path, library)));
 
@@ -126,8 +167,9 @@ namespace Microsoft.DotNet.ToolPackage
         {
             try
             {
-                var library = FindLibraryInLockFile(_lockFile.Value);
-                return DeserializeToolConfiguration(library);
+                var lockFile = new LockFileFormat().Read(PackageDirectory.WithFile(AssetsFileName).Value);
+                var library = FindLibraryInLockFile(lockFile);
+                return DeserializeToolConfiguration(ToolSettingsFileName, library);
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
             {
@@ -144,7 +186,8 @@ namespace Microsoft.DotNet.ToolPackage
             LockFileTargetLibrary library;
             try
             {
-                library = FindLibraryInLockFile(_lockFile.Value);
+                LockFile lockFile = new LockFileFormat().Read(PackageDirectory.WithFile(AssetsFileName).Value);
+                library = FindLibraryInLockFile(lockFile);
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
             {
@@ -187,7 +230,7 @@ namespace Microsoft.DotNet.ToolPackage
             }
         }
 
-        private ToolConfiguration DeserializeToolConfiguration(LockFileTargetLibrary library)
+        private ToolConfiguration DeserializeToolConfiguration(string ToolSettingsFileName, LockFileTargetLibrary library)
         {
             var dotnetToolSettings = FindItemInTargetLibrary(library, ToolSettingsFileName);
             if (dotnetToolSettings == null)
@@ -207,17 +250,12 @@ namespace Microsoft.DotNet.ToolPackage
             return configuration;
         }
 
-        private static LockFileTargetLibrary FindLibraryInLockFile(LockFile lockFile, PackageId id)
+        private LockFileTargetLibrary FindLibraryInLockFile(LockFile lockFile)
         {
             return lockFile
                 ?.Targets?.SingleOrDefault(t => t.RuntimeIdentifier != null)
                 ?.Libraries?.SingleOrDefault(l =>
-                    string.Compare(l.Name, id.ToString(), StringComparison.OrdinalIgnoreCase) == 0);
-        }
-
-        private LockFileTargetLibrary FindLibraryInLockFile(LockFile lockFile)
-        {
-            return FindLibraryInLockFile(lockFile, Id);
+                    string.Compare(l.Name, Id.ToString(), StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         private static LockFileItem FindItemInTargetLibrary(LockFileTargetLibrary library, string targetRelativeFilePath)

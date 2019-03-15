@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
         }
-        /*  shoud be F# no VB...
+
         [Fact]
         public void ICanBuildVBApps()
         {
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tests
                 _testInstance.Root.FullName,
                 "bin",
                 configuration,
-                "netcoreapp3.0",
+                "netcoreapp2.1",
                 "publish",
                 "VBTestApp.dll");
 
@@ -66,6 +66,5 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass()
                          .And.HaveStdOutContaining("Hello World");
         }
-        */
     }
 }

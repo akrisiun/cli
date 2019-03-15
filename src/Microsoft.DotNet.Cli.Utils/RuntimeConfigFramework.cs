@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
  
 namespace Microsoft.DotNet.Cli.Utils
 { 
-    internal class RuntimeConfigFramework
+    public class RuntimeConfigFramework 
     { 
         public string Name { get; set; } 
         public string Version { get; set; } 

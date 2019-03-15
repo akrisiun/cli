@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         static TestBase()
         {
-            // set culture of test process to match CLI sub-processes when the UI language is overridden.
+            // set culture of test process to match CLI sub-processes when the UI language is overriden.
             string overriddenUILanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
             if (overriddenUILanguage != null)
             {
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                     s_testAssets = new TestAssets(
                         new DirectoryInfo(assetsRoot),
-                        new FileInfo(DotnetUnderTest.FullName),
+                        new FileInfo(new Muxer().MuxerPath),
                         new RepoDirectoriesProvider().TestWorkingFolder); 
                 }
 

@@ -38,11 +38,15 @@ namespace Microsoft.DotNet.ShellShim
             _filePermissionSetter = filePermissionSetter ?? new FilePermissionSetter();
         }
 
-        public void CreateShim(FilePath targetExecutablePath, ToolCommandName commandName, IReadOnlyList<FilePath> packagedShims = null)
+        public void CreateShim(FilePath targetExecutablePath, string commandName, IReadOnlyList<FilePath> packagedShims = null)
         {
             if (string.IsNullOrEmpty(targetExecutablePath.Value))
             {
                 throw new ShellShimException(CommonLocalizableStrings.CannotCreateShimForEmptyExecutablePath);
+            }
+            if (string.IsNullOrEmpty(commandName))
+            {
+                throw new ShellShimException(CommonLocalizableStrings.CannotCreateShimForEmptyCommand);
             }
 
             if (ShimExists(commandName))
@@ -99,7 +103,7 @@ namespace Microsoft.DotNet.ShellShim
                 });
         }
 
-        public void RemoveShim(ToolCommandName commandName)
+        public void RemoveShim(string commandName)
         {
             var files = new Dictionary<string, string>();
             TransactionalAction.Run(
@@ -118,7 +122,7 @@ namespace Microsoft.DotNet.ShellShim
                         throw new ShellShimException(
                             string.Format(
                                 CommonLocalizableStrings.FailedToRemoveShellShim,
-                                commandName.ToString(),
+                                commandName,
                                 ex.Message
                             ),
                             ex);
@@ -148,31 +152,36 @@ namespace Microsoft.DotNet.ShellShim
             public StartupOptions startupOptions { get; set; }
         }
 
-        private bool ShimExists(ToolCommandName commandName)
+        private bool ShimExists(string commandName)
         {
             return GetShimFiles(commandName).Any(p => _fileSystem.File.Exists(p.Value));
         }
 
-        private IEnumerable<FilePath> GetShimFiles(ToolCommandName commandName)
+        private IEnumerable<FilePath> GetShimFiles(string commandName)
         {
+            if (string.IsNullOrEmpty(commandName))
+            {
+                yield break;
+            }
+
             yield return GetShimPath(commandName);
         }
 
-        private FilePath GetShimPath(ToolCommandName commandName)
+        private FilePath GetShimPath(string commandName)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return _shimsDirectory.WithFile(commandName.Value + ".exe");
+                return new FilePath(_shimsDirectory.WithFile(commandName).Value +".exe");
             }
             else
             {
-                return _shimsDirectory.WithFile(commandName.Value);
+                return _shimsDirectory.WithFile(commandName);
             }
         }
 
         private bool TryGetPackagedShim(
             IReadOnlyList<FilePath> packagedShims,
-            ToolCommandName commandName,
+            string commandName,
             out FilePath? packagedShim)
         {
             packagedShim = null;

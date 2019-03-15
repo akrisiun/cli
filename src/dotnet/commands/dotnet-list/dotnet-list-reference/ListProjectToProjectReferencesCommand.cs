@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tools.List.ProjectToProjectReferences
 
         public override int Execute()
         {
-            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory, false);
+            var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
 
             var p2ps = msbuildProj.GetProjectToProjectReferences();
             if (!p2ps.Any())

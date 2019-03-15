@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.Store.LocalizableStrings;
@@ -22,8 +23,6 @@ namespace Microsoft.DotNet.Cli
                           .With(name: LocalizableStrings.ProjectManifest)
                           .ForwardAsMany(o =>
                           {
-                              // the first path doesn't need to go through CommandDirectoryContext.ExpandPath
-                              // since it is a direct argument to MSBuild, not a property
                               var materializedString = $"{o.Arguments.First()}";
 
                               if (o.Arguments.Count == 1)
@@ -38,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                                   return new[]
                                   {
                                       materializedString,
-                                      $"-property:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1).Select(CommandDirectoryContext.GetFullPath))}"
+                                      $"-property:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1))}"
                                   };
                               }
                           })),
@@ -55,13 +54,13 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:ComposeDir={Path.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
-                        .ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:ComposeWorkingDir={o.Arguments.Single()}")),
                 Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,

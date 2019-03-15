@@ -1,12 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-	<TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>dotnet-restore.Tests</AssemblyName>
     <AssetTargetFallback>$(AssetTargetFallback);dnxcore50;portable-net45+win8</AssetTargetFallback>
-
-    <MicrosoftBuildFrameworkPackageVersion>15.7.177</MicrosoftBuildFrameworkPackageVersion>
-	<!-- 16.0.452-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,12 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- 
-	<PackageReference Include="Microsoft.Build" Version="16.0.452" />
-	<PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />
-	nuget install Microsoft.Build -o ..
-	-->
-	<Reference Include="Microsoft.Build" HintPath="..\Microsoft.Build.16.0.454\lib\netcoreapp2.1\Microsoft.Build.dll" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
   </ItemGroup>

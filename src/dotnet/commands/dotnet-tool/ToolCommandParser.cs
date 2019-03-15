@@ -18,9 +18,7 @@ namespace Microsoft.DotNet.Cli
                 ToolInstallCommandParser.ToolInstall(),
                 ToolUninstallCommandParser.ToolUninstall(),
                 ToolUpdateCommandParser.ToolUpdate(),
-                ToolListCommandParser.ToolList(),
-                ToolRunCommandParser.ToolRun(),
-                ToolRestoreCommandParser.ToolRestore());
+                ToolListCommandParser.ToolList());
         }
     }
 }

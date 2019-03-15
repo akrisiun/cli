@@ -29,18 +29,9 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(
-            IFirstTimeUseNoticeSentinel sentinel,
-            string sessionId,
-            bool blockThreadInitialization = false,
-            IEnvironmentProvider environmentProvider = null)
+        public Telemetry(IFirstTimeUseNoticeSentinel sentinel, string sessionId, bool blockThreadInitialization = false)
         {
-            if (environmentProvider == null)
-            {
-                environmentProvider = new EnvironmentProvider();
-            }
-
-            Enabled = !environmentProvider.GetEnvironmentVariableAsBool(TelemetryOptout, false) && PermissionExists(sentinel);
+            Enabled = !Env.GetEnvironmentVariableAsBool(TelemetryOptout) && PermissionExists(sentinel);
 
             if (!Enabled)
             {
@@ -150,7 +141,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
             {
                 foreach (KeyValuePair<string, double> measurement in measurements)
                 {
-                    eventMeasurements[measurement.Key] = measurement.Value;
+                    if (eventMeasurements.ContainsKey(measurement.Key))
+                    {
+                        eventMeasurements[measurement.Key] = measurement.Value;
+                    }
+                    else
+                    {
+                        eventMeasurements.Add(measurement.Key, measurement.Value);
+                    }
                 }
             }
             return eventMeasurements;
@@ -163,7 +161,14 @@ namespace Microsoft.DotNet.Cli.Telemetry
                 var eventProperties = new Dictionary<string, string>(_commonProperties);
                 foreach (KeyValuePair<string, string> property in properties)
                 {
-                    eventProperties[property.Key] = property.Value;
+                    if (eventProperties.ContainsKey(property.Key))
+                    {
+                        eventProperties[property.Key] = property.Value;
+                    }
+                    else
+                    {
+                        eventProperties.Add(property.Key, property.Value);
+                    }
                 }
                 return eventProperties;
             }

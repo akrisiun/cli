@@ -20,19 +20,10 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
-                    "--local",
-                    LocalizableStrings.LocalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
                     "--tool-path",
                     LocalizableStrings.ToolPathOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.ToolPathOptionName)),
-                Create.Option(
-                    "--tool-manifest",
-                    LocalizableStrings.ManifestPathOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .With(name: LocalizableStrings.ManifestPathOptionName)),
                 CommonOptions.HelpOption());
         }
     }

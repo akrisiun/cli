@@ -47,11 +47,27 @@ namespace Microsoft.DotNet.Tools.Restore
             return new RestoreCommand(msbuildArgs, msbuildPath);
         }
 
+        public static int Exec(string[] args)
+        {
+            var ret = Run(args);
+            return ret;
+        }
+
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromArgs(args).Execute();
+            RestoreCommand cmd;
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
+            
+            return cmd.Execute();
         }
     }
 }

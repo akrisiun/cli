@@ -11,8 +11,6 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
-using Microsoft.DotNet.CommandFactory;
-using System.Diagnostics;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -20,25 +18,20 @@ namespace Microsoft.DotNet.Tools.Run
     {
         public string Configuration { get; private set; }
         public string Framework { get; private set; }
-        public string Runtime { get; private set; }
         public bool NoBuild { get; private set; }
         public string Project { get; private set; }
-        public IEnumerable<string> Args { get; set; }
+        public IReadOnlyCollection<string> Args { get; private set; }
         public bool NoRestore { get; private set; }
-        public bool Interactive { get; private set; }
         public IEnumerable<string> RestoreArgs { get; private set; }
 
+        private List<string> _args;
         private bool ShouldBuild => !NoBuild;
-        private bool HasQuietVerbosity =>
-            RestoreArgs.All(arg => !arg.StartsWith("-verbosity:", StringComparison.Ordinal) ||
-                                    arg.Equals("-verbosity:q", StringComparison.Ordinal) ||
-                                    arg.Equals("-verbosity:quiet", StringComparison.Ordinal));
 
         public string LaunchProfile { get; private set; }
         public bool NoLaunchProfile { get; private set; }
         private bool UseLaunchProfile => !NoLaunchProfile;
 
-        public int Execute()
+        public int Start()
         {
             Initialize();
 
@@ -47,48 +40,40 @@ namespace Microsoft.DotNet.Tools.Run
                 EnsureProjectIsBuilt();
             }
 
-            Exception err = null;
-            int ret = -1;
             try
             {
-                ICommand targetCommand = GetTargetCommand();
-                if (!ApplyLaunchProfileSettingsIfNeeded(ref targetCommand))
+                ICommand runCommand = GetRunCommand();
+                int launchSettingsApplicationResult = ApplyLaunchProfileSettingsIfNeeded(ref runCommand);
+
+                if (launchSettingsApplicationResult != 0)
                 {
-                    return 1;
+                    return launchSettingsApplicationResult;
                 }
-                
-                ret = targetCommand.Execute().ExitCode;
+
+                return runCommand
+                    .Execute()
+                    .ExitCode;
             }
             catch (InvalidProjectFileException e)
             {
-                err = e;
-            }
-            
-            if (err != null)
-            { 
-                // throw or retry while debugging?
                 throw new GracefulException(
                     string.Format(LocalizableStrings.RunCommandSpecifiecFileIsNotAValidProject, Project),
-                    err as InvalidProjectFileException);
+                    e);
             }
-            return ret;
         }
 
         public RunCommand(string configuration,
             string framework,
-            string runtime,
             bool noBuild,
             string project,
             string launchProfile,
             bool noLaunchProfile,
             bool noRestore,
-            bool interactive,
             IEnumerable<string> restoreArgs,
-            IEnumerable<string> args)
+            IReadOnlyCollection<string> args)
         {
             Configuration = configuration;
             Framework = framework;
-            Runtime = runtime;
             NoBuild = noBuild;
             Project = project;
             LaunchProfile = launchProfile;
@@ -96,73 +81,84 @@ namespace Microsoft.DotNet.Tools.Run
             Args = args;
             RestoreArgs = restoreArgs;
             NoRestore = noRestore;
-            Interactive = interactive;
         }
 
-        private bool ApplyLaunchProfileSettingsIfNeeded(ref ICommand targetCommand)
+        public RunCommand MakeNewWithReplaced(string configuration = null,
+            string framework = null,
+            bool? noBuild = null,
+            string project = null,
+            string launchProfile = null,
+            bool? noLaunchProfile = null,
+            bool? noRestore = null,
+            IEnumerable<string> restoreArgs = null,
+            IReadOnlyCollection<string> args = null)
         {
-            if (!UseLaunchProfile)
+            return new RunCommand(
+                configuration ?? this.Configuration,
+                framework ?? this.Framework,
+                noBuild ?? this.NoBuild,
+                project ?? this.Project,
+                launchProfile ?? this.LaunchProfile,
+                noLaunchProfile ?? this.NoLaunchProfile,
+                noRestore ?? this.NoRestore,
+                restoreArgs ?? this.RestoreArgs,
+                args ?? this.Args
+            );
+        }
+
+        private int ApplyLaunchProfileSettingsIfNeeded(ref ICommand runCommand)
+        {
+            if (UseLaunchProfile)
             {
-                return true;
-            }
-
-            var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
-            var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
-            if (File.Exists(launchSettingsPath))
-            {
-                if (!HasQuietVerbosity) {
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
-                }
-
-                string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
-
-                try
+                var buildPathContainer = File.Exists(Project) ? Path.GetDirectoryName(Project) : Project;
+                var launchSettingsPath = Path.Combine(buildPathContainer, "Properties", "launchSettings.json");
+                if (File.Exists(launchSettingsPath))
                 {
-                    var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
-                    var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref targetCommand, LaunchProfile);
-                    if (!applyResult.Success)
+                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.UsingLaunchSettingsFromMessage, launchSettingsPath));
+                    string profileName = string.IsNullOrEmpty(LaunchProfile) ? LocalizableStrings.DefaultLaunchProfileDisplayName : LaunchProfile;
+
+                    try
                     {
-                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
+                        var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
+                        var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, LaunchProfile);
+                        if (!applyResult.Success)
+                        {                            
+                            //Error that the launch profile couldn't be applied
+                            Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName).Bold().Red());
+                        Reporter.Error.WriteLine(ex.Message.Bold().Red());
+                        return -1;
                     }
                 }
-                catch (IOException ex)
+                else if (!string.IsNullOrEmpty(LaunchProfile))
                 {
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName).Bold().Red());
-                    Reporter.Error.WriteLine(ex.Message.Bold().Red());
-                    return false;
+                    //Error that the launch profile couldn't be found
+                    Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
                 }
             }
-            else if (!string.IsNullOrEmpty(LaunchProfile))
-            {
-                Reporter.Error.WriteLine(LocalizableStrings.RunCommandExceptionCouldNotLocateALaunchSettingsFile.Bold().Red());
-            }
 
-            return true;
+            return 0;
         }
 
         private void EnsureProjectIsBuilt()
         {
             var restoreArgs = GetRestoreArguments();
 
-            var cmd =
+            var buildResult =
                 new RestoringCommand(
                     restoreArgs.Prepend(Project),
                     restoreArgs,
-                    new[] { Project },
+                    new [] { Project },
                     NoRestore
-                );
-            var buildResult = cmd.Execute();
+                ).Execute();
 
             if (buildResult != 0)
             {
                 Reporter.Error.WriteLine();
-                
-                Reporter.Error.WriteLine("Debugger.Break()");
-                if (Debugger.IsAttached)
-                    Debugger.Break();
-                //else 
-                //    Debugger.Launch();
-
                 throw new GracefulException(LocalizableStrings.RunCommandException);
             }
         }
@@ -174,12 +170,9 @@ namespace Microsoft.DotNet.Tools.Run
                 "-nologo"
             };
 
-            // --interactive need to output guide for auth. It cannot be
-            // completely "quiet"
             if (!RestoreArgs.Any(a => a.StartsWith("-verbosity:")))
             {
-                var defaultVerbosity = Interactive ? "minimal" : "quiet";
-                args.Add($"-verbosity:{defaultVerbosity}");
+                args.Add("-verbosity:quiet");
             }
 
             args.AddRange(RestoreArgs);
@@ -187,7 +180,7 @@ namespace Microsoft.DotNet.Tools.Run
             return args;
         }
 
-        private ICommand GetTargetCommand()
+        private ICommand GetRunCommand()
         {
             var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -207,12 +200,6 @@ namespace Microsoft.DotNet.Tools.Run
                 globalProperties.Add("TargetFramework", Framework);
             }
 
-            if (!string.IsNullOrWhiteSpace(Runtime))
-            {
-                globalProperties.Add("RuntimeIdentifier", Runtime);
-            }
-
-            // .nuget\packages\microsoft.build\16.0.0-preview.360\lib\netcoreapp2.1\Microsoft.Build.dll
             var project = new ProjectInstance(Project, globalProperties, null);
 
             string runProgram = project.GetPropertyValue("RunCommand");
@@ -224,23 +211,16 @@ namespace Microsoft.DotNet.Tools.Run
             string runArguments = project.GetPropertyValue("RunArguments");
             string runWorkingDirectory = project.GetPropertyValue("RunWorkingDirectory");
 
-            if (Args.Any())
+            string fullArguments = runArguments;
+            if (_args.Any())
             {
-                runArguments += " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Args);
+                fullArguments += " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(_args);
             }
 
-            CommandSpec commandSpec = new CommandSpec(runProgram, runArguments);
+            CommandSpec commandSpec = new CommandSpec(runProgram, fullArguments, CommandResolutionStrategy.None);
 
-            var command = CommandFactoryUsingResolver.Create(commandSpec)
+            return Command.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
-
-            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
-            if (Environment.GetEnvironmentVariable(rootVariableName) == null)
-            {
-                command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
-            }
-
-            return command;
         }
 
         private void ThrowUnableToRunError(ProjectInstance project)
@@ -251,16 +231,20 @@ namespace Microsoft.DotNet.Tools.Run
                 string targetFramework = project.GetPropertyValue("TargetFramework");
                 if (string.IsNullOrEmpty(targetFramework))
                 {
-                    throw new GracefulException(LocalizableStrings.RunCommandExceptionUnableToRunSpecifyFramework, "--framework");
+                    var framework = "--framework";
+
+                    throw new GracefulException(LocalizableStrings.RunCommandExceptionUnableToRunSpecifyFramework, framework);
                 }
             }
+
+            string outputType = project.GetPropertyValue("OutputType");
 
             throw new GracefulException(
                     string.Format(
                         LocalizableStrings.RunCommandExceptionUnableToRun,
                         "dotnet run",
                         "OutputType",
-                        project.GetPropertyValue("OutputType")));
+                        outputType));
         }
 
         private void Initialize()
@@ -268,11 +252,20 @@ namespace Microsoft.DotNet.Tools.Run
             if (string.IsNullOrWhiteSpace(Project))
             {
                 Project = Directory.GetCurrentDirectory();
-            }
-
-            if (Directory.Exists(Project))
+            } 
+            
+            if (Directory.Exists(Project)) 
             {
                 Project = FindSingleProjectInDirectory(Project);
+            }
+
+            if (Args == null)
+            {
+                _args = new List<string>();
+            }
+            else
+            {
+                _args = new List<string>(Args);
             }
         }
 
@@ -282,7 +275,9 @@ namespace Microsoft.DotNet.Tools.Run
 
             if (projectFiles.Length == 0)
             {
-                throw new GracefulException(LocalizableStrings.RunCommandExceptionNoProjects, directory, "--project");
+                var project = "--project";
+
+                throw new GracefulException(LocalizableStrings.RunCommandExceptionNoProjects, directory, project);
             }
             else if (projectFiles.Length > 1)
             {

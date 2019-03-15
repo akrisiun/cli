@@ -60,47 +60,9 @@ namespace Microsoft.DotNet.Tools.MSBuild
             return ret;
         }
 
-        public static bool Fast { get; set; }
-
         public virtual int Execute()
         {
-            if (Fast) {
-                return GetProcessStartInfo().Execute();
-            }
-
-            int ret;
-            var proc = GetProcessStartInfo();
-            var line = string.Join(" ", Environment.GetCommandLineArgs());
-            var arguments = proc.Arguments;
-            if (
-               (line.Contains("-v d") || line.Contains("-v n")) && 
-               arguments.Contains("-verbosity:"))
-            {
-                if (line.Contains("-v d"))
-                    arguments = arguments.Replace("-verbosity:m", "-verbosity:d");
-                if (line.Contains("-v n"))
-                    arguments = arguments.Replace("-verbosity:m", "-verbosity:n");
-            }
-            string[] args1 = arguments.Split(new char[] { ' ' });
-
-            if (args1.Length > 2 && 
-               (args1[0] == "exec" || line.Contains("--debug") || CommandContext.IsVerbose())
-               ) 
-            {
-                string[] arg2 = new string[] { };
-                Array.Resize(ref arg2, args1.Length - 2);
-                Array.Copy(args1, 2, arg2, 0, args1.Length - 2);
-
-                Assembly msb = NugetLib.Load.MSBuildApp;
-                Console.WriteLine($"MSB dotnet {msb.FullName}");
-
-                ret = NugetLib.Load.Build(arg2);
-
-            } else {
-                ret = proc.Execute();
-            }
-
-            return ret;
+            return GetProcessStartInfo().Execute();
         }
     }
 }

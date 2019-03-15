@@ -70,16 +70,16 @@ namespace Microsoft.DotNet.ShellShim
 
         private bool PackageExecutablePathWillExistForFutureNewProcess()
         {
-            return EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
-                   || EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine));
+            return EnvironmentVariableConatinsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.User))
+                   || EnvironmentVariableConatinsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Machine));
         }
 
         private bool PackageExecutablePathExistsForCurrentProcess()
         {
-            return EnvironmentVariableContainsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
+            return EnvironmentVariableConatinsPackageExecutablePath(_environmentProvider.GetEnvironmentVariable(PathName, EnvironmentVariableTarget.Process));
         }
 
-        private bool EnvironmentVariableContainsPackageExecutablePath(string environmentVariable)
+        private bool EnvironmentVariableConatinsPackageExecutablePath(string environmentVariable)
         {
             if (environmentVariable == null)
             {

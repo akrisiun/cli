@@ -8,11 +8,9 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
-using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
-using Newtonsoft.Json;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -20,10 +18,9 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     internal class ProjectRestorerMock : IProjectRestorer
     {
         public const string FakeEntrypointName = "SimulatorEntryPoint.dll";
-        public const string DefaultToolCommandName = "SimulatorCommand";
+        public const string FakeCommandName = "SimulatorCommand";
         public const string DefaultPackageName = "global.tool.console.demo";
         public const string DefaultPackageVersion = "1.0.4";
-        public const string FakeCommandSettingsFileName = "FakeDotnetToolSettings.json";
 
         private readonly IFileSystem _fileSystem;
         private readonly IReporter _reporter;
@@ -42,14 +39,13 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             {
                 _feeds.Add(new MockFeed
                     {
-                        Type = MockFeedType.FeedFromGlobalNugetConfig,
+                        Type = MockFeedType.FeedFromLookUpNugetConfig,
                         Packages = new List<MockFeedPackage>
                         {
                             new MockFeedPackage
                             {
                                 PackageId = DefaultPackageName,
-                                Version = DefaultPackageVersion,
-                                ToolCommandName = DefaultToolCommandName,
+                                Version = DefaultPackageVersion
                             }
                         }
                     });
@@ -61,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         }
 
         public void Restore(FilePath project,
-            PackageLocation packageLocation,
+            FilePath? nugetConfig = null,
             string verbosity = null)
         {
             string packageId;
@@ -96,8 +92,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             var feedPackage = GetPackage(
                 packageId,
                 versionRange,
-                packageLocation.NugetConfig,
-                packageLocation.RootConfigDirectory);
+                nugetConfig);
 
             var packageVersion = feedPackage.Version;
             targetFramework = string.IsNullOrEmpty(targetFramework) ? "targetFramework" : targetFramework;
@@ -107,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 packageVersion.ToLowerInvariant(),
                 "tools",
                 targetFramework,
-                Constants.AnyRid);
+                "any");
             var fakeExecutablePath = Path.Combine(fakeExecutableSubDirectory, FakeEntrypointName);
 
             _fileSystem.Directory.CreateDirectory(Path.Combine(assetJsonOutput.Value, fakeExecutableSubDirectory));
@@ -115,38 +110,29 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _fileSystem.File.WriteAllText(
                 assetJsonOutput.WithFile("project.assets.json").Value,
                 fakeExecutablePath);
-            _fileSystem.File.WriteAllText(
-                assetJsonOutput.WithFile(FakeCommandSettingsFileName).Value,
-                JsonConvert.SerializeObject(new { Name = feedPackage.ToolCommandName }));
         }
 
-        public MockFeedPackage GetPackage(
+        private MockFeedPackage GetPackage(
             string packageId,
-            VersionRange versionRange,
-            FilePath? nugetConfig = null,
-            DirectoryPath? rootConfigDirectory = null)
+            VersionRange versionRange = null,
+            FilePath? nugetConfig = null)
         {
             var allPackages = _feeds
-                .Where(feed =>
+                .Where(f =>
                 {
-                    if (nugetConfig == null)
+                    if (nugetConfig != null)
                     {
-                        return SimulateNugetSearchNugetConfigAndMatch(
-                            rootConfigDirectory,
-                            feed);
+                        return ExcludeOtherFeeds(nugetConfig, f);
                     }
-                    else
-                    {
-                        return ExcludeOtherFeeds(nugetConfig.Value, feed);
-                    }
+
+                    return true;
                 })
                 .SelectMany(f => f.Packages)
-                .Where(f => f.PackageId == packageId)
-                .ToList();
+                .Where(f => f.PackageId == packageId);
 
             var bestVersion = versionRange.FindBestMatch(allPackages.Select(p => NuGetVersion.Parse(p.Version)));
 
-            var package = allPackages.FirstOrDefault(p => NuGetVersion.Parse(p.Version).Equals(bestVersion));
+            var package = allPackages.Where(p => NuGetVersion.Parse(p.Version).Equals(bestVersion)).FirstOrDefault();
 
             if (package == null)
             {
@@ -157,49 +143,10 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             return package;
         }
 
-        /// <summary>
-        /// Simulate NuGet search nuget config from parent directories.
-        /// Assume all nuget.config has Clear
-        /// And then filter against mock feed
-        /// </summary>
-        private bool SimulateNugetSearchNugetConfigAndMatch(
-            DirectoryPath? rootConfigDirectory,
-            MockFeed feed)
-        {
-            if (rootConfigDirectory != null)
-            {
-                var probedNugetConfig = EnumerateDefaultAllPossibleNuGetConfig(rootConfigDirectory.Value)
-                    .FirstOrDefault(possibleNugetConfig =>
-                        _fileSystem.File.Exists(possibleNugetConfig.Value));
-
-                if (!Equals(probedNugetConfig, default(FilePath)))
-                {
-                    return (feed.Type == MockFeedType.FeedFromLookUpNugetConfig) ||
-                           (feed.Type == MockFeedType.ImplicitAdditionalFeed) ||
-                           (feed.Type == MockFeedType.FeedFromLookUpNugetConfig
-                            && feed.Uri == probedNugetConfig.Value);
-                }
-            }
-
-            return feed.Type != MockFeedType.ExplicitNugetConfig
-                    && feed.Type != MockFeedType.FeedFromLookUpNugetConfig;
-        }
-
-        private static IEnumerable<FilePath> EnumerateDefaultAllPossibleNuGetConfig(DirectoryPath probStart)
-        {
-            DirectoryPath? currentSearchDirectory = probStart;
-            while (currentSearchDirectory.HasValue)
-            {
-                var tryNugetConfig = currentSearchDirectory.Value.WithFile("nuget.config");
-                yield return tryNugetConfig;
-                currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
-            }
-        }
-
-        private static bool ExcludeOtherFeeds(FilePath nugetConfig, MockFeed f)
+        private static bool ExcludeOtherFeeds(FilePath? nugetConfig, MockFeed f)
         {
             return f.Type == MockFeedType.ImplicitAdditionalFeed
-                   || (f.Type == MockFeedType.ExplicitNugetConfig && f.Uri == nugetConfig.Value);
+                   || (f.Type == MockFeedType.ExplicitNugetConfig && f.Uri == nugetConfig.Value.Value);
         }
     }
 }

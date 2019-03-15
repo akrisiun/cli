@@ -37,9 +37,9 @@ namespace Microsoft.DotNet.Cli
                     .With(name: CommonLocalizableStrings.FrameworkArgumentName)
                     .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
         
-        public static Option RuntimeOption(string description, bool withShortOption = true) =>
+        public static Option RuntimeOption(string description) =>
             Create.Option(
-                withShortOption ? "-r|--runtime" : "--runtime",
+                "-r|--runtime",
                 description,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 description,
                 Accept.ExactlyOneArgument()
                     .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
-                    .WithSuggestionsFrom(_ => Suggest.ConfigurationsFromProjectFileOrDefaults())
+                    .WithSuggestionsFrom("Debug", "Release")
                     .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
 
         public static Option VersionSuffixOption() =>
@@ -70,19 +70,6 @@ namespace Microsoft.DotNet.Cli
             Create.Option(
                 "--no-restore",
                 CommonLocalizableStrings.NoRestoreDescription,
-                Accept.NoArguments());
-
-        public static Option InteractiveMsBuildForwardOption() =>
-            Create.Option(
-                "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
-                Accept.NoArguments()
-                    .ForwardAs(Utils.Constants.MsBuildInteractiveOption));
-
-        public static Option InteractiveOption() =>
-            Create.Option(
-                "--interactive",
-                CommonLocalizableStrings.CommandInteractiveOptionDescription,
                 Accept.NoArguments());
     }
 }

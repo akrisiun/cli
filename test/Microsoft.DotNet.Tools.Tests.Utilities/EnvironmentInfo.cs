@@ -1,40 +1,44 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.DotNet.PlatformAbstractions;
-using System.IO;
-using System.Linq;
-
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
     public static class EnvironmentInfo
     {
         public static bool HasSharedFramework(string framework)
         {
-            string runtimesFolder =
-                Path.Combine(new RepoDirectoriesProvider().DotnetRoot, "shared", "Microsoft.NETCore.App");
-
-            var sharedRuntimes = Directory.EnumerateDirectories(runtimesFolder);
+            string rid = RepoDirectoriesProvider.BuildRid;
 
             if (framework == "netcoreapp1.0")
             {
-                if (!sharedRuntimes.Any(s => s.StartsWith("1.0")))
+                switch (rid)
                 {
-                    return false;
+                    case "fedora.24-x64":
+                    case "rhel.6-x64":
+                    case "linux-musl-x64":
+                    case "opensuse.42.1-x64":
+                    case "ubuntu.16.10-x64":
+                    case "linux-x64":
+                        return false;
                 }
             }
             else if (framework == "netcoreapp1.1")
             {
-                if (!sharedRuntimes.Any(s => s.StartsWith("1.1")))
+                switch (rid)
                 {
-                    return false;
+                    case "linux-x64":
+                    case "rhel.6-x64":
+                    case "linux-musl-x64":
+                        return false;
                 }
             }
             else if (framework == "netcoreapp2.0")
             {
-                if (!sharedRuntimes.Any(s => s.StartsWith("2.0")))
+                switch (rid)
                 {
-                    return false;
+                    case "rhel.6-x64":
+                    case "linux-musl-x64":
+                        return false;
                 }
             }
 

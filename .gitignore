@@ -316,3 +316,4 @@ vendor/core-sdk/
 vendor/app/
 vendor/DotNetCorePlugins/
 vendor/corefx/
+bin/obj/HostInfo.props

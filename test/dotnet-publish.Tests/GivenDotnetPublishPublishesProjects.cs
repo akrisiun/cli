@@ -34,11 +34,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework netcoreapp2.1")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp3.0", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.1", "publish", $"{testAppName}.dll");
 
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework netcoreapp2.1")
                 .Should().Pass();
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp3.0")
+                .Execute("--framework netcoreapp2.1")
                 .Should().Pass();
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp3.0 --no-restore")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.1 --no-restore")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
         }
@@ -123,7 +123,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputDirectory = PublishApp(testAppName, rid, args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
@@ -132,14 +131,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            var command = new TestCommand(outputProgram);
-            command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] =
-                new RepoDirectoriesProvider().DotnetRoot;
-            command.ExecuteWithCapturedOutput()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
+            new DotnetCommand()
+                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
         }
 
         [Theory]
@@ -151,7 +146,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
@@ -181,35 +175,40 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             return testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp3.0", rid ?? "", "publish");
+                    .GetDirectory("bin", configuration, "netcoreapp2.1", rid ?? "", "publish");
         }
 
         [Fact]
         public void ItPublishesAppWhenRestoringToSpecificPackageDirectory()
         {
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootDir = new DirectoryInfo(rootPath);
+
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles();
-            var rootDir = testInstance.Root;
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
 
             new RestoreCommand()
-                .WithWorkingDirectory(rootDir)
+                .WithWorkingDirectory(rootPath)
                 .Execute(args)
                 .Should()
                 .Pass();
 
             new PublishCommand()
-                .WithWorkingDirectory(rootDir)
+                .WithWorkingDirectory(rootPath)
                 .ExecuteWithCapturedOutput("--no-restore")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp3.0", "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp2.1", "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)
@@ -221,12 +220,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void ItFailsToPublishWithNoBuildIfNotPreviouslyBuilt()
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles(); // note implicit restore here
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
 
-            var rootPath = testInstance.Root;
+            string newArgs = $"console -o \"{rootPath}\"";
+            new NewCommandShim() // note implicit restore here
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
 
             new PublishCommand()
                 .WithWorkingDirectory(rootPath)
@@ -241,11 +242,15 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [InlineData(true)]
         public void ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt(bool selfContained)
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance(nameof(ItPublishesSuccessfullyWithNoBuildIfPreviouslyBuilt) + selfContained)
-                .WithSourceFiles();
+            var rootPath = TestAssets.CreateTestDirectory(identifier: selfContained ? "_sc" : "").FullName;
+            var rootDir = new DirectoryInfo(rootPath);
 
-            var rootPath = testInstance.Root;
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
 
             var rid = selfContained ? DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier() : "";
             var ridArg = selfContained ? $"-r {rid}" : "";
@@ -264,8 +269,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputProgram = rootPath
-                .GetDirectory("bin", configuration, "netcoreapp3.0", rid, "publish", $"{rootPath.Name}.dll")
+            var outputProgram = rootDir
+                .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)
@@ -278,11 +283,15 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         [Fact]
         public void ItFailsToPublishWithNoBuildIfPreviouslyBuiltWithoutRid()
         {
-            var testInstance = TestAssets.Get("TestAppSimple")
-                .CreateInstance()
-                .WithSourceFiles();
+            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var rootDir = new DirectoryInfo(rootPath);
 
-            var rootPath = testInstance.Root;
+            string newArgs = $"console -o \"{rootPath}\" --no-restore";
+            new NewCommandShim()
+                .WithWorkingDirectory(rootPath)
+                .Execute(newArgs)
+                .Should()
+                .Pass();
 
             new BuildCommand()
                 .WithWorkingDirectory(rootPath)

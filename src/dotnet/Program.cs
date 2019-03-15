@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-//using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Telemetry;
@@ -19,8 +19,6 @@ using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
-using Microsoft.DotNet.CommandFactory;
-using System.Reflection;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -34,7 +32,6 @@ namespace Microsoft.DotNet.Cli
 
             new MulticoreJitActivator().TryActivateMulticoreJit();
 
-            // $env:DOTNET_CLI_CAPTURE_TIMING=1
             if (Env.GetEnvironmentVariableAsBool("DOTNET_CLI_CAPTURE_TIMING", false))
             {
                 PerfTrace.Enabled = true;
@@ -42,35 +39,17 @@ namespace Microsoft.DotNet.Cli
 
             InitializeProcess();
 
-            int ret = 0;
             try
             {
                 using (PerfTrace.Current.CaptureTiming())
                 {
-                    // NuGet.Frameworks, Version=5.0.0.1
-                    // NuGet.Frameworks, Version=5.0.0.4
-                    if (args.Length >= 1 && args[0] == "--info") // || CommandContext.IsVerbose())
-                    {
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        ProcessDomain();
-                        Console.ResetColor();
-                    }
-
-                    ret = ProcessArgs(args);
-
-                    return ret;
+                    return ProcessArgs(args);
                 }
             }
             catch (HelpException e)
             {
                 Reporter.Output.WriteLine(e.Message);
-                ret = 0;
-            }
-            catch (FileNotFoundException e) 
-            {
-                Reporter.Error.WriteLine($"no file {e}");
-                ProcessDomain();
-                ret = 1;
+                return 0;
             }
             catch (Exception e) when (e.ShouldBeDisplayedAsError())
             {
@@ -84,13 +63,13 @@ namespace Microsoft.DotNet.Cli
                     Reporter.Output.WriteLine(commandParsingException.HelpText);
                 }
 
-                ret = 1;
+                return 1;
             }
             catch (Exception e) when (!e.ShouldBeDisplayedAsError())
             {
                 Reporter.Error.WriteLine(e.ToString().Red().Bold());
 
-                ret = 1;
+                return 1;
             }
             finally
             {
@@ -100,37 +79,9 @@ namespace Microsoft.DotNet.Cli
                     PerfTraceOutput.Print(Reporter.Output, PerfTrace.GetEvents());
                 }
             }
-
-            if (ret != 0 && CommandContext.IsVerbose())
-            {
-                ProcessDomain();
-            }
-
-            return ret;
         }
 
-        public static void ProcessDomain()
-        {
-            var domain = AppDomain.CurrentDomain;
-            var asm = domain.GetAssemblies();
-            var list = asm.Where((a) => !a.IsDynamic).OrderBy((a) => a.FullName);
-
-            var dotAsm = typeof(Program).Assembly;
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.Write($"{domain.BaseDirectory} : {dotAsm.FullName} - exe {dotAsm.Location}");
-            Console.ResetColor();
-
-            foreach (Assembly a in list) {
-                Console.WriteLine($"{a.FullName} | {a.Location}");
-            }
-            
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            NugetLib.Load.Assemblies();
-
-            Console.ResetColor();
-        }
-
-        public static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
@@ -139,6 +90,7 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
+            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -192,10 +144,10 @@ namespace Microsoft.DotNet.Cli
 
                         bool generateAspNetCertificate =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
+                        bool printTelemetryMessage =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
                         bool skipFirstRunExperience =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
-                        bool telemetryOptout =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", false);
 
                         ReportDotnetHomeUsage(environmentProvider);
 
@@ -214,11 +166,12 @@ namespace Microsoft.DotNet.Cli
                         }
 
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
-                            generateAspNetCertificate: generateAspNetCertificate,
-                            skipFirstRunExperience: skipFirstRunExperience,
-                            telemetryOptout: telemetryOptout);
+                            generateAspNetCertificate,
+                            printTelemetryMessage,
+                            skipFirstRunExperience);
 
                         ConfigureDotNetForFirstTimeUse(
+                            nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
@@ -265,31 +218,10 @@ namespace Microsoft.DotNet.Cli
                 }
 
                 exitCode = builtIn.Command(appArgs.ToArray());
-
-                var cmd = topLevelCommandParserResult.Command;
-                if ((cmd == "restore" || cmd == "build") &&
-                    exitCode != 0)
-                {
-                    // not ok restore
-                    NugetLib.Load.Assemblies();    
-                }
-            }
-            else if (topLevelCommandParserResult.Command.EndsWith(".dll"))
-            {
-                var newArgs = new List<string>();
-                newArgs.Add(topLevelCommandParserResult.Command);
-                newArgs.AddRange(appArgs);
-                
-                CommandResult result = CommandFactoryUsingResolver.Create(
-                        "dotnet" ,
-                        newArgs,
-                        FrameworkConstants.CommonFrameworks.NetStandardApp15)
-                    .Execute();
-                exitCode = result.ExitCode;
             }
             else
             {
-                CommandResult result = CommandFactoryUsingResolver.Create(
+                CommandResult result = Command.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)
@@ -320,6 +252,7 @@ namespace Microsoft.DotNet.Cli
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
+            INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
@@ -329,10 +262,16 @@ namespace Microsoft.DotNet.Cli
         {
             using (PerfTrace.Current.CaptureTiming())
             {
+                var nugetPackagesArchiver = new NuGetPackagesArchiver();
                 var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
+                var nugetCachePrimer = new NuGetCachePrimer(
+                    nugetPackagesArchiver,
+                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
+                    nugetCachePrimer,
+                    nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,
@@ -369,7 +308,7 @@ namespace Microsoft.DotNet.Cli
         {
             DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
             var commitSha = versionFile.CommitSha ?? "N/A";
-            Reporter.Output.WriteLine($"DOT debug </> {LocalizableStrings.DotNetSdkInfoLabel}");
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetSdkInfoLabel}");
             Reporter.Output.WriteLine($" Version:   {Product.Version}");
             Reporter.Output.WriteLine($" Commit:    {commitSha}");
             Reporter.Output.WriteLine();

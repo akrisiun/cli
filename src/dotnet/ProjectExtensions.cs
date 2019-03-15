@@ -21,20 +21,15 @@ namespace Microsoft.DotNet.Tools.ProjectExtensions
 
         public static IEnumerable<NuGetFramework> GetTargetFrameworks(this Project project)
         {
-            var targetFrameworksStrings = project
+            var targetFramewoksStrings = project
                     .GetPropertyCommaSeparatedValues("TargetFramework")
                     .Union(project.GetPropertyCommaSeparatedValues("TargetFrameworks"))
                     .Select((value) => value.ToLower());
 
-            var uniqueTargetFrameworkStrings = new HashSet<string>(targetFrameworksStrings);
+            var uniqueTargetFrameworkStrings = new HashSet<string>(targetFramewoksStrings);
 
             return uniqueTargetFrameworkStrings
                 .Select((frameworkString) => NuGetFramework.Parse(frameworkString));
-        }
-
-        public static IEnumerable<string> GetConfigurations(this Project project)
-        {
-            return project.GetPropertyCommaSeparatedValues("Configurations");
         }
 
         public static IEnumerable<string> GetPropertyCommaSeparatedValues(this Project project, string propertyName)

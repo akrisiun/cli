@@ -1,25 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <Version>$(SdkVersion)</Version>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
-    <Architecture>x64</Architecture>
-    <Rid>osx.10.14-x64</Rid>
     <!---->
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <LibDir>~/bin/dotc</LibDir>
-    <NewtonsoftVersion>9.0.1</NewtonsoftVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-  </PropertyGroup>
 
+    <LibDir>c:\bin\dotc</LibDir>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
     <Compile Include="commands\dotnet-new\*.cs" />
@@ -27,7 +21,6 @@
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
     <EmbeddedResource Update="*.resx" Namespace="Microsoft.DotNet.Tools" />
     <EmbeddedResource Update="BuildServer\*.resx" Namespace="Microsoft.DotNet.BuildServer" />
-    <EmbeddedResource Update="CommandFactory\*.resx" Namespace="Microsoft.DotNet.CommandFactory" />
     <EmbeddedResource Update="**\dotnet-add-package\*.resx" Namespace="Microsoft.DotNet.Tools.Add.PackageReference" />
     <EmbeddedResource Update="**\dotnet-add-reference\*.resx" Namespace="Microsoft.DotNet.Tools.Add.ProjectToProjectReference" />
     <EmbeddedResource Update="**\dotnet-add\*.resx" Namespace="Microsoft.DotNet.Tools.Add" />
@@ -36,7 +29,6 @@
     <EmbeddedResource Update="**\dotnet-buildserver\shutdown\*.resx" Namespace="Microsoft.DotNet.Tools.BuildServer.Shutdown" />
     <EmbeddedResource Update="**\dotnet-clean\*.resx" Namespace="Microsoft.DotNet.Tools.Clean" />
     <EmbeddedResource Update="**\dotnet-help\*.resx" Namespace="Microsoft.DotNet.Tools.Help" />
-    <EmbeddedResource Update="**\dotnet-list-package\*.resx" Namespace="Microsoft.DotNet.Tools.List.PackageReferences" />
     <EmbeddedResource Update="**\dotnet-list-reference\*.resx" Namespace="Microsoft.DotNet.Tools.List.ProjectToProjectReferences" />
     <EmbeddedResource Update="**\dotnet-list\*.resx" Namespace="Microsoft.DotNet.Tools.List" />
     <EmbeddedResource Update="**\dotnet-migrate\*.resx" Namespace="Microsoft.DotNet.Tools.Migrate" />
@@ -55,101 +47,44 @@
     <EmbeddedResource Update="**\dotnet-tool\uninstall\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Uninstall" />
     <EmbeddedResource Update="**\dotnet-tool\install\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Install" />
     <EmbeddedResource Update="**\dotnet-tool\update\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Update" />
-    <EmbeddedResource Update="**\dotnet-tool\restore\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Restore" />
-    <EmbeddedResource Update="**\dotnet-tool\run\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Run" />
-    <EmbeddedResource Update="ToolManifest\*.resx" Namespace="Microsoft.DotNet.ToolManifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.InternalAbstractions/Microsoft.DotNet.InternalAbstractions.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Utils/Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="../Microsoft.DotNet.Cli.Sln.Internal/Microsoft.DotNet.Cli.Sln.Internal.csproj" />
-    <!--
-    <ProjectReference Include="..\..\vendor\NugetLib\NugetLib.csproj" />
-    -->
   </ItemGroup>
   <ItemGroup>
-    <!--<PackageReference Include="Newtonsoft.Json" Version="12.0.1" />-->
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.0.0" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.TextWriterTraceListener" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Private.DataContractSerialization" Version="4.3.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.3.0" />
-    <PackageReference Include="NuGet.Build" Version="2.12.1" />
-     
-    <!--
-    NuGet.Build - version 2.12.1 
-    The type 'ValueType' is defined in an assembly that is not referenced. You must add a reference to assembly
-    'netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51'. [dotnet] -->
-
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Tools.MigrateCommand" Version="$(MicrosoftDotNetToolsMigrateCommandPackageVersion)" />
-    <!--MicrosoftDotNetProjectJsonMigrationPackageVersion-->
-
     <PackageReference Include="Microsoft.DotNet.ProjectJsonMigration" Version="$(MicrosoftDotNetProjectJsonMigrationPackageVersion)" />
-    <!--
     <PackageReference Include="Microsoft.TemplateEngine.Abstractions" Version="$(MicrosoftTemplateEngineAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Cli" Version="$(MicrosoftTemplateEngineCliPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(MicrosoftTemplateEngineCliLocalizationPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
-    -->
+    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
+    <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
+
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
   </ItemGroup>
-  <Target Name="CoreBuild">
-    <Message Importance="High" Text="CoreBuild: src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
-  </Target>
-  <Target Name="PreBuildTask">
-    <Message Importance="High" Text="PreBuildTask: src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)" />
-  </Target>
-  <Target Name="PostBuildTask" AfterTargets="Build">
-  </Target>
+
   <ItemGroup>
-    <!--3.0.0-preview3-27503-5
-    3.0.0-preview4-27419-7
-    3.0.100-preview4-010386
-    'Microsoft.NETCore.App' specified a Version of `3.0.0-preview4-27419-7
-    <PackageReference Include="Microsoft.NETCore.App" Version="3.0.0-preview4-27419-7" />
-    <PackageReference Include="Microsoft.Build"  Version="16.0.452" />
-    Microsoft.Build.Runtime.16.0.452.nupkg
-    -->
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildPackageVersion)" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildPackageVersion)" />
-    <!--
-    <Reference Include="MSBuild, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\Vendor\lib\MSBuild.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\Vendor\lib\Microsoft.Build.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Framework, Version=42.42.42.42, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\Vendor\lib\Microsoft.Build.Framework.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Tasks.Core">
-      <HintPath>..\..\Vendor\lib\Microsoft.Build.Tasks.Core.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    <Reference Include="Microsoft.Build.Utilities.Core">
-      <HintPath>..\..\Vendor\lib\Microsoft.Build.Utilities.Core.dll</HintPath>
-	  <Private>true</Private>
-    </Reference>
-    -->
-    <PackageReference Include="NuGet.Frameworks" Version="5.0.0-preview1.5663" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="5.0.0-preview1.5663" />
-    <PackageReference Include="NuGet.Commands" Version="5.0.0-preview1.5663" />
-	<PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="5.0.0-preview1.5663" />
+    <Folder Include="commands\dotnet-migrate\xlf" />
+    <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
   <Target Name="PostBuildTask" AfterTargets="Build">
     <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | copy to $(LibDir)\$(TargetName).dll" />
@@ -158,18 +93,4 @@
     <Exec Condition="'$(MSBuildRuntimeType)' == 'Full'" Command="$(DotNetDir)dotnet.exe build $(SourceDir) -o $(LibDir) -c Debug --no-restore" />
   </Target>
 
-  <Target Name="ExecBuild">
-    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | dotnet.dll copy to $(LibDir)\dotnet.dll" />
-    <Message Condition="Exists($(LibDir))" Importance="High" Text="$(DotNetDir)\dotnet.exe build -o $(LibDir) -c Debug --no-restore" />
-    <Exec Command="$(DotNetDir)/dotnet.exe build $(SourceDir) -o $(LibDir) -c Debug $(minus)$(minus)no-restore" />
-    
-  </Target>
-  <Target Name="PostBuildTask" AfterTargets="Build">
-    <Message Condition="Exists($(LibDir))" Importance="High" Text="MSBuildRuntimeType=$(MSBuildRuntimeType)" />
-    <Message Condition="Exists($(LibDir))" Importance="High" Text="| src\dotnet\dotnet.csproj | copy to $(LibDir)\dotnet.dll" />
-    <Message Condition="!Exists($(LibDir))" Importance="High" Text="NO $(LibDir)" />
-    <Copy Condition="Exists($(LibDir))" SourceFiles="$(TargetDir)$(TargetName).dll" DestinationFiles="$(LibDir)\$(TargetName).dll" SkipUnchangedFiles="false" />
-
-  </Target>
- 
 </Project>

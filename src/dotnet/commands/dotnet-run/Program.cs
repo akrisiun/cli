@@ -11,36 +11,48 @@ namespace Microsoft.DotNet.Tools.Run
 {
     public partial class RunCommand
     {
-        public static RunCommand FromArgs(string[] args)
+        public static RunCommand FromArgs(string[] args, string msbuildPath = null)
         {
             var result = Parser.Instance.ParseFrom("dotnet run", args);
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            var command = result["dotnet"]["run"].Value<RunCommand>();
+            var runCommand = result["dotnet"]["run"].Value<RunCommand>();
+            return IncludingArgumentsAfterDoubleDash(runCommand, result.UnparsedTokens);
+        }
 
-            if (result.UnparsedTokens != null)
-            {
-                command.Args = command.Args.Concat(result.UnparsedTokens);
-            }
+        private static RunCommand IncludingArgumentsAfterDoubleDash(
+            RunCommand runCommand,
+            IEnumerable<string> unparsedTokens)
+        {
+            return runCommand.MakeNewWithReplaced(
+                args: runCommand.Args
+                    .Concat(unparsedTokens)
+                    .ToList());
+        }
 
-            return command;
+        public static int Exec(string[] args)
+        {
+            var ret = Run(args);
+            return ret;
         }
 
         public static int Run(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            return FromArgs(args).Execute();
-        }
+            RunCommand cmd;
 
-        public static int Exec(string[] args)
-        {
-            DebugHelper.HandleDebugSwitch(ref args);
+            try
+            {
+                cmd = FromArgs(args);
+            }
+            catch (CommandCreationException e)
+            {
+                return e.ExitCode;
+            }
 
-            var exe = FromArgs(args);
-            var ret = exe.Execute();
-            return ret;
+            return cmd.Start();
         }
     }
 }

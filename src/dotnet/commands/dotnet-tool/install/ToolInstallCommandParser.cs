@@ -20,10 +20,6 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.GlobalOptionDescription,
                     Accept.NoArguments()),
                 Create.Option(
-                    "--local",
-                    LocalizableStrings.LocalOptionDescription,
-                    Accept.NoArguments()),
-                Create.Option(
                     "--tool-path",
                     LocalizableStrings.ToolPathOptionDescription,
                     Accept.ExactlyOneArgument()
@@ -37,12 +33,7 @@ namespace Microsoft.DotNet.Cli
                     "--configfile",
                     LocalizableStrings.ConfigFileOptionDescription,
                     Accept.ExactlyOneArgument()
-                        .With(name: LocalizableStrings.ConfigFileOptionName)),
-                Create.Option(
-                    "--tool-manifest",
-                    LocalizableStrings.ManifestPathOptionDescription,
-                    Accept.ZeroOrOneArgument()
-                        .With(name: LocalizableStrings.ManifestPathOptionName)),
+                          .With(name: LocalizableStrings.ConfigFileOptionName)),
                 Create.Option(
                     "--add-source",
                     LocalizableStrings.AddSourceOptionDescription,
@@ -53,10 +44,6 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.FrameworkOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.FrameworkOptionName)),
-                ToolCommandRestorePassThroughOptions.DisableParallelOption(),
-                ToolCommandRestorePassThroughOptions.IgnoreFailedSourcesOption(),
-                ToolCommandRestorePassThroughOptions.NoCacheOption(),
-                ToolCommandRestorePassThroughOptions.InteractiveRestoreOption(),
                 CommonOptions.HelpOption(),
                 CommonOptions.VerbosityOption());
         }

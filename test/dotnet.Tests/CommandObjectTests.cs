@@ -7,8 +7,6 @@ using System;
 using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
-using Microsoft.DotNet.CommandFactory;
-using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests
 {
@@ -24,21 +22,21 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenItCannotResolveCommandItThrows()
         {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>() ); };
+            Action a = () => { Command.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>() ); };
             a.ShouldThrow<CommandUnknownException>();
         }
 
         [Fact]
         public void WhenItCannotResolveCommandButCommandIsInListOfKnownToolsItThrows()
         {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>()); };
+            Action a = () => { Command.Create(new ResolveNothingCommandResolverPolicy(), "non-exist-command", Array.Empty<string>()); };
             a.ShouldThrow<CommandUnknownException>();
         }
 
         [Fact]
         public void WhenItCannotResolveCommandButCommandIsInListOfKnownToolsItThrowsWithGuideToUseTool()
         {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-ef", Array.Empty<string>()); };
+            Action a = () => { Command.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-ef", Array.Empty<string>()); };
             a.ShouldThrow<CommandAvailableAsDotNetToolException>()
                 .And.Message.Should()
                 .Contain(string.Format(LocalizableStrings.CannotFindCommandAvailableAsTool,
@@ -49,7 +47,7 @@ namespace Microsoft.DotNet.Tests
         [Fact]
         public void WhenItCannotResolveCommandButCommandIsInListOfKnownToolsItThrowsWithGuideToUseToolWithNormalizedCasing()
         {
-            Action a = () => { CommandFactoryUsingResolver.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-EF", Array.Empty<string>()); };
+            Action a = () => { Command.Create(new ResolveNothingCommandResolverPolicy(), "dotnet-EF", Array.Empty<string>()); };
             a.ShouldThrow<CommandAvailableAsDotNetToolException>()
                 .And.Message.Should()
                 .Contain(string.Format(LocalizableStrings.CannotFindCommandAvailableAsTool,

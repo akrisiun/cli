@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools;
@@ -24,7 +23,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:PublishDir={o.Arguments.Single()}")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
@@ -34,7 +33,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.ManifestOptionDescription,
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.ManifestOption)
-                        .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments.Select(CommandDirectoryContext.GetFullPath))}")),
+                        .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments)}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.NoBuildOptionDescription,
@@ -49,7 +48,6 @@ namespace Microsoft.DotNet.Cli
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
                             return $"-property:SelfContained={value}";
                         })),
-                CommonOptions.InteractiveMsBuildForwardOption(),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }

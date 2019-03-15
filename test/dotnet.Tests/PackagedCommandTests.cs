@@ -92,6 +92,41 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void IfPreviousVersionOfSharedFrameworkIsNotInstalled_ToolsTargetingItFail(bool toolPrefersCLIRuntime)
+        {
+            var testInstance = TestAssets.Get("AppWithToolDependency")
+                .CreateInstance(identifier: toolPrefersCLIRuntime ? "preferCLIRuntime" : "")
+                .WithSourceFiles()
+                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+
+            testInstance = testInstance.WithProjectChanges(project =>
+            {
+                var ns = project.Root.Name.Namespace;
+
+                var toolReference = project.Descendants(ns + "DotNetCliToolReference")
+                    .Where(tr => tr.Attribute("Include").Value == "dotnet-portable")
+                    .Single();
+
+                toolReference.Attribute("Include").Value =
+                    toolPrefersCLIRuntime ? "dotnet-portable-v1-prefercli" : "dotnet-portable-v1";
+            });
+
+            testInstance = testInstance.WithRestoreFiles();
+
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
+                .Execute()
+                .Should().Pass();
+
+            new GenericCommand(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1")
+                .WithWorkingDirectory(testInstance.Root)
+                .Execute()
+                .Should().Fail();
+        }
+
         [RequiresSpecificFrameworkTheory("netcoreapp1.1")]
         [InlineData(true)]
         [InlineData(false)]
@@ -121,7 +156,8 @@ namespace Microsoft.DotNet.Tests
                 .Execute()
                 .Should().Pass();
 
-            var result = new DotnetCommand()
+            var result =
+                new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute(toolPrefersCLIRuntime ? "portable-v1-prefercli" : "portable-v1");
 
@@ -173,7 +209,8 @@ namespace Microsoft.DotNet.Tests
 
             testInstance = testInstance.WithRestoreFiles();
 
-            var result = new DotnetCommand()
+            var result =
+                    new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                     .WithWorkingDirectory(testInstance.Root)
                     .Execute("portable-v1");
 
@@ -197,6 +234,31 @@ namespace Microsoft.DotNet.Tests
             new GenericCommand("tool-with-output-name")
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput()
+                .Should().HaveStdOutContaining("Tool with output name!")
+                     .And.NotHaveStdErr()
+                     .And.Pass();
+        }
+
+        [Fact]
+        public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
+        {
+            var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
+                .CreateInstance()
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            string framework = Tools.Tests.Utilities.NuGetFrameworks.NetCoreApp21.DotNetFrameworkName;
+
+            new BuildCommand()
+                .WithProjectDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
+                .Execute()
+                .Should().Pass();
+
+            new DependencyToolInvokerCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+                .WithWorkingDirectory(testInstance.Root)
+                .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
+                .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
                 .Should().HaveStdOutContaining("Tool with output name!")
                      .And.NotHaveStdErr()
                      .And.Pass();
@@ -231,7 +293,7 @@ namespace Microsoft.DotNet.Tests
             //                         ^-- index = 24
             string randomPackageName = Guid.NewGuid().ToString().Substring(24);
 
-            // TODO: This is a workaround for https://github.com/dotnet/cli/issues/5020
+            // TODO: This is a workround for https://github.com/dotnet/cli/issues/5020
             SetGeneratedPackageName(appWithDepOnToolDir.GetFile("AppWithDepOnTool.csproj"),
                                     randomPackageName);
 
@@ -245,12 +307,12 @@ namespace Microsoft.DotNet.Tests
 
             new PackCommand()
                 .WithWorkingDirectory(toolWithRandPkgNameDir)
-                .Execute($"-o \"{pkgsDir.FullName}\" /p:version=1.0.0")
+                .Execute($"-o \"{pkgsDir.FullName}\"")
                 .Should().Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(appWithDepOnToolDir)
-                .Execute($"--source \"{pkgsDir.FullName}\"")
+                .Execute($"--packages \"{pkgsDir.FullName}\"")
                 .Should().Pass();
 
             new TestCommand("dotnet")
@@ -261,7 +323,53 @@ namespace Microsoft.DotNet.Tests
                 .And.NotHaveStdErr();
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
+        [WindowsOnlyTheory(Skip="https://github.com/dotnet/cli/issues/4514")]
+        [MemberData("DependencyToolArguments")]
+        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
+        {
+            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
+                .CreateInstance(identifier: identifier)
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
+                .Execute()
+                .Should().Pass();
+
+            new DependencyToolInvokerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
+                .Should().HaveStdOutContaining(framework)
+                    .And.HaveStdOutContaining(identifier)
+                    .And.HaveStdOutContaining(expectedDependencyToolPath)
+                    .And.NotHaveStdErr()
+                    .And.Pass();
+        }
+
+        [WindowsOnlyTheory]
+        [MemberData("LibraryDependencyToolArguments")]
+        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
+        {
+            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "LibWithProjTool2Fx")
+                .CreateInstance(identifier: identifier)
+                .WithSourceFiles()
+                .WithRestoreFiles();
+
+            new BuildCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .WithConfiguration("Debug")
+                .Execute()
+                .Should().Pass();
+
+            new DependencyToolInvokerCommand()
+                .WithWorkingDirectory(testInstance.Root)
+                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
+                .Should().Fail();
+        }
+
+        [Fact]
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = TestAssets.Get("DependencyContextFromTool")
@@ -269,7 +377,7 @@ namespace Microsoft.DotNet.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
-            new DependencyContextTestCommand(DotnetUnderTest.FullName)
+            new DependencyContextTestCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute("")
                 .Should().Pass();
@@ -315,7 +423,7 @@ namespace Microsoft.DotNet.Tests
                 .WithRestoreFiles();
 
             var assetsFile = new DirectoryInfo(new RepoDirectoriesProvider().NugetPackages)
-                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp3.0")
+                .GetDirectory(".tools", "dotnet-portable", "1.0.0", "netcoreapp2.1")
                 .GetFile("project.assets.json");
 
             var stopWatch = Stopwatch.StartNew();

@@ -16,8 +16,18 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
  
         static TempRoot()
         {
-            Root = new RepoDirectoriesProvider().TestArtifactsFolder;
-            DoDispose = false;
+            var persistedRoot = Environment.GetEnvironmentVariable("TEST_ARTIFACTS");
+
+            if (string.IsNullOrWhiteSpace(persistedRoot))
+            {
+                Root = Path.Combine(Path.GetTempPath(), "DotnetCLITests");
+                DoDispose = true;
+            }
+            else
+            {
+                Root = persistedRoot;
+                DoDispose = false;
+            }
 
             Directory.CreateDirectory(Root);
         }

@@ -15,9 +15,9 @@
     - Current - most current release
     - LTS - most current supported release
     - 2-part version in a format A.B - represents a specific release
-          examples: 2.0, 1.0
+          examples: 2.0; 1.0
     - Branch name
-          examples: release/2.0.0, Master
+          examples: release/2.0.0; Master
 .PARAMETER Version
     Default: latest
     Represents a build version on specific channel. Possible values:
@@ -25,14 +25,14 @@
     - coherent - most latest coherent build on specific channel
           coherent applies only to SDK downloads
     - 3-part version in a format A.B.C - represents specific version of build
-          examples: 2.0.0-preview2-006120, 1.1.0
+          examples: 2.0.0-preview2-006120; 1.1.0
 .PARAMETER InstallDir
     Default: %LocalAppData%\Microsoft\dotnet
     Path to where to install dotnet. Note that binaries will be placed directly in a given directory.
 .PARAMETER Architecture
     Default: <auto> - this value represents currently running OS architecture
     Architecture of dotnet binaries to be installed.
-    Possible values are: <auto>, amd64, x64, x86, arm64, arm
+    Possible values are: <auto>, x64 and x86
 .PARAMETER SharedRuntime
     This parameter is obsolete and may be removed in a future version of this script.
     The recommended alternative is '-Runtime dotnet'.
@@ -73,8 +73,6 @@
 .PARAMETER SkipNonVersionedFiles
     Default: false
     Skips installing non-versioned files if they already exist, such as dotnet.exe.
-.PARAMETER NoCdn
-    Disable downloading from the Azure CDN, and use the uncached feed directly.
 #>
 [cmdletbinding()]
 param(
@@ -93,17 +91,12 @@ param(
    [string]$FeedCredential,
    [string]$ProxyAddress,
    [switch]$ProxyUseDefaultCredentials,
-   [switch]$SkipNonVersionedFiles,
-   [switch]$NoCdn
+   [switch]$SkipNonVersionedFiles
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference="Stop"
 $ProgressPreference="SilentlyContinue"
-
-if ($NoCdn) {
-    $AzureFeed = $UncachedFeed
-}
 
 $BinFolderRelativePath=""
 
@@ -151,10 +144,11 @@ function Invoke-With-Retry([ScriptBlock]$ScriptBlock, [int]$MaxAttempts = 3, [in
 function Get-Machine-Architecture() {
     Say-Invocation $MyInvocation
 
-    # possible values: amd64, x64, x86, arm64, arm
+    # possible values: AMD64, IA64, x86
     return $ENV:PROCESSOR_ARCHITECTURE
 }
 
+# TODO: Architecture and CLIArchitecture should be unified
 function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
     Say-Invocation $MyInvocation
 
@@ -162,8 +156,6 @@ function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
         { $_ -eq "<auto>" } { return Get-CLIArchitecture-From-Architecture $(Get-Machine-Architecture) }
         { ($_ -eq "amd64") -or ($_ -eq "x64") } { return "x64" }
         { $_ -eq "x86" } { return "x86" }
-        { $_ -eq "arm" } { return "arm" }
-        { $_ -eq "arm64" } { return "arm64" }
         default { throw "Architecture not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues" }
     }
 }
@@ -469,30 +461,11 @@ function Extract-Dotnet-Package([string]$ZipPath, [string]$OutPath) {
     }
 }
 
-function DownloadFile($Source, [string]$OutPath) {
-    if ($Source -notlike "http*") {
-        #  Using System.IO.Path.GetFullPath to get the current directory
-        #    does not work in this context - $pwd gives the current directory
-        if (![System.IO.Path]::IsPathRooted($Source)) {
-            $Source = $(Join-Path -Path $pwd -ChildPath $Source)
-        }
-        $Source = Get-Absolute-Path $Source
-        Say "Copying file from $Source to $OutPath"
-        Copy-Item $Source $OutPath
-        return
-    }
-
+function DownloadFile([Uri]$Uri, [string]$OutPath) {
     $Stream = $null
     Write-host "DownloadFile:   Invoke-webrequest -Uri $Uri -Proxy $env:https_proxy -o $OutPath"
 
     try {
-<<<<<<< HEAD
-        $Response = GetHTTPResponse -Uri $Source
-        $Stream = $Response.Content.ReadAsStreamAsync().Result
-        $File = [System.IO.File]::Create($OutPath)
-        $Stream.CopyTo($File)
-        $File.Close()
-=======
         # $Response = GetHTTPResponse -Uri $Uri
         
         # $Response = 
@@ -504,7 +477,6 @@ function DownloadFile($Source, [string]$OutPath) {
         
         # $Stream.CopyTo($File)
         # $File.Close()
->>>>>>> refs/remotes/origin/osx
     }
     finally {
         if ($Stream -ne $null) {
@@ -516,13 +488,8 @@ function DownloadFile($Source, [string]$OutPath) {
 function Prepend-Sdk-InstallRoot-To-Path([string]$InstallRoot, [string]$BinFolderRelativePath) {
     $BinPath = Get-Absolute-Path $(Join-Path -Path $InstallRoot -ChildPath $BinFolderRelativePath)
     if (-Not $NoPath) {
-        $SuffixedBinPath = "$BinPath;"
-        if (-Not $env:path.Contains($SuffixedBinPath)) {
-            Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
-            $env:path = $SuffixedBinPath + $env:path
-        } else {
-            Say-Verbose "Current process PATH already contains `"$BinPath`""
-        }
+        Say "Adding to current process PATH: `"$BinPath`". Note: This change will not be visible if PowerShell was run as a child process."
+        $env:path = "$BinPath;" + $env:path
     }
     else {
         Say "Binaries of dotnet can be found in $BinPath"
@@ -574,19 +541,17 @@ if ($isAssetInstalled) {
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
 $installDrive = $((Get-Item $InstallRoot).PSDrive.Name);
-$diskInfo = Get-PSDrive -Name $installDrive
-if ($diskInfo.Free / 1MB -le 100) {
+$free = Get-CimInstance -Class win32_logicaldisk | where Deviceid -eq "${installDrive}:"
+if ($free.Freespace / 1MB -le 100 ) {
     Say "There is not enough disk space on drive ${installDrive}:"
     exit 0
 }
 
 $ZipPath = [System.IO.Path]::combine([System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName())
 Say-Verbose "Zip path: $ZipPath"
-
-$DownloadFailed = $false
 Say "Downloading link: $DownloadLink"
 try {
-    DownloadFile -Source $DownloadLink -OutPath $ZipPath
+    DownloadFile -Uri $DownloadLink -OutPath $ZipPath
 }
 catch {
     Say "Cannot download: $DownloadLink"
@@ -595,21 +560,11 @@ catch {
         $ZipPath = [System.IO.Path]::combine([System.IO.Path]::GetTempPath(), [System.IO.Path]::GetRandomFileName())
         Say-Verbose "Legacy zip path: $ZipPath"
         Say "Downloading legacy link: $DownloadLink"
-        try {
-            DownloadFile -Source $DownloadLink -OutPath $ZipPath
-        }
-        catch {
-            Say "Cannot download: $DownloadLink"
-            $DownloadFailed = $true
-        }
+        DownloadFile -Uri $DownloadLink -OutPath $ZipPath
     }
     else {
-        $DownloadFailed = $true
+        throw "Could not download $assetName version $SpecificVersion"
     }
-}
-
-if ($DownloadFailed) {
-    throw "Could not find/download: `"$assetName`" with version = $SpecificVersion`nRefer to: https://aka.ms/dotnet-os-lifecycle for information on .NET Core support"
 }
 
 Say "Extracting zip from $DownloadLink"
@@ -618,7 +573,7 @@ Extract-Dotnet-Package -ZipPath $ZipPath -OutPath $InstallRoot
 #  Check if the SDK version is now installed; if not, fail the installation.
 $isAssetInstalled = Is-Dotnet-Package-Installed -InstallRoot $InstallRoot -RelativePathToPackage $dotnetPackageRelativePath -SpecificVersion $SpecificVersion
 if (!$isAssetInstalled) {
-    throw "`"$assetName`" with version = $SpecificVersion failed to install with an unknown error."
+    throw "$assetName version $SpecificVersion failed to install with an unknown error."
 }
 
 Remove-Item $ZipPath

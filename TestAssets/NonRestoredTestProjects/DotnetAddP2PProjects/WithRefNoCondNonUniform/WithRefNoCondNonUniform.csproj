@@ -6,6 +6,10 @@
     <TargetFrameworks>net451;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
     <SomeItemCausingThisGroupToNotBeUniform Include="foo" />
     <ProjectReference Include="..\Lib\Lib.csproj" />

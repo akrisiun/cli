@@ -30,15 +30,6 @@ namespace Microsoft.DotNet.Tests.ParserTests
         }
 
         [Fact]
-        public void ListToolParserCanGetLocalOption()
-        {
-            var result = Parser.Instance.Parse("dotnet tool list --local");
-
-            var appliedOptions = result["dotnet"]["tool"]["list"];
-            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
-        }
-
-        [Fact]
         public void ListToolParserCanParseToolPathOption()
         {
             var result =

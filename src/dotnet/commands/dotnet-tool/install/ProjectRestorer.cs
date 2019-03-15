@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
@@ -15,45 +14,38 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal class ProjectRestorer : IProjectRestorer
     {
+        private const string AnyRid = "any";
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly bool _forceOutputRedirection;
-        private readonly IEnumerable<string> _additionalRestoreArguments;
 
-        public ProjectRestorer(IReporter reporter = null,
-            IEnumerable<string> additionalRestoreArguments = null)
+        public ProjectRestorer(IReporter reporter = null)
         {
-            _additionalRestoreArguments = additionalRestoreArguments;
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
             _forceOutputRedirection = reporter != null;
         }
 
         public void Restore(FilePath project,
-            PackageLocation packageLocation,
+            FilePath? nugetConfig = null,
             string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
             argsToPassToRestore.Add(project.Value);
-            if (packageLocation.NugetConfig != null)
+            if (nugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(packageLocation.NugetConfig.Value.Value);
+                argsToPassToRestore.Add(nugetConfig.Value.Value);
             }
 
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                Constants.AnyRid
+                AnyRid
             });
 
-            argsToPassToRestore.Add($"-verbosity:{verbosity ?? GetDefaultVerbosity()}");
-
-            if (_additionalRestoreArguments != null)
-            {
-                argsToPassToRestore.AddRange(_additionalRestoreArguments);
-            }
+            argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
 
             var command = new DotNetCommandFactory(alwaysRunOutOfProc: true)
                 .Create("restore", argsToPassToRestore);
@@ -70,24 +62,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             {
                 throw new ToolPackageException(LocalizableStrings.ToolInstallationRestoreFailed);
             }
-        }
-
-        /// <summary>
-        /// Workaround to https://github.com/dotnet/cli/issues/10523
-        /// Output quiet will break "--interactive" experience since
-        /// it will output nothing. However, minimal output will have
-        /// the temp project path.
-        /// </summary>
-        private string GetDefaultVerbosity()
-        {
-            var defaultVerbosity = "quiet";
-            if ((_additionalRestoreArguments != null)
-                && _additionalRestoreArguments.Contains(Constants.RestoreInteractiveOption, StringComparer.Ordinal))
-            {
-                defaultVerbosity = "minimal";
-            }
-
-            return defaultVerbosity;
         }
 
         private static void WriteLine(IReporter reporter, string line, FilePath project)

@@ -377,9 +377,7 @@ namespace Microsoft.DotNet.Cli.CommandLine
         // Show full help
         public void ShowHelp(string commandName = null)
         {
-            var headerBuilder = new StringBuilder("DOT debug </>");
-            headerBuilder.Append(LocalizableStrings.UsageHeader);
-
+            var headerBuilder = new StringBuilder(LocalizableStrings.UsageHeader);
             var usagePrefixLength = headerBuilder.Length;
             for (var cmd = this; cmd != null; cmd = cmd.Parent)
             {

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -17,29 +16,121 @@ namespace Microsoft.DotNet.Cli.Utils
         private readonly Process _process;
 
         private StreamForwarder _stdOut;
-
+        
         private StreamForwarder _stdErr;
 
         private bool _running = false;
 
-        public Command(Process process)
+        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-ef", "fsi", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch" };
+
+        private Command(CommandSpec commandSpec)
         {
-            _process = process ?? throw new ArgumentNullException(nameof(process));
+            var psi = new ProcessStartInfo
+            {
+                FileName = commandSpec.Path,
+                Arguments = commandSpec.Args,
+                UseShellExecute = false
+            };
+
+            foreach(var environmentVariable in commandSpec.EnvironmentVariables)
+            {
+                if (!psi.Environment.ContainsKey(environmentVariable.Key))
+                {
+                    psi.Environment.Add(environmentVariable.Key, environmentVariable.Value);
+                }
+            }
+
+            _process = new Process
+            {
+                StartInfo = psi
+            };
+
+            ResolutionStrategy = commandSpec.ResolutionStrategy;
+        }
+
+        public static Command CreateDotNet(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework = null,  
+            string configuration = Constants.DefaultConfiguration)
+        {
+            return Create("dotnet", 
+                new[] { commandName }.Concat(args), 
+                framework, 
+                configuration: configuration);
+        }
+
+        /// <summary>
+        /// Create a command with the specified arg array. Args will be 
+        /// escaped properly to ensure that exactly the strings in this
+        /// array will be present in the corresponding argument array
+        /// in the command's process.
+        /// </summary>
+        public static Command Create(
+            string commandName, 
+            IEnumerable<string> args, 
+            NuGetFramework framework = null, 
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null,
+            string applicationName  = null)
+        {
+            return Create(
+                new DefaultCommandResolverPolicy(),
+                commandName,
+                args,
+                framework,
+                configuration,
+                outputPath,
+                applicationName);
+        }
+
+        public static Command Create(
+            ICommandResolverPolicy commandResolverPolicy,
+            string commandName,
+            IEnumerable<string> args,
+            NuGetFramework framework = null,
+            string configuration = Constants.DefaultConfiguration,
+            string outputPath = null,
+            string applicationName  = null)
+        {
+            var commandSpec = CommandResolver.TryResolveCommandSpec(
+                commandResolverPolicy,
+                commandName,
+                args, 
+                framework, 
+                configuration: configuration,
+                outputPath: outputPath,
+                applicationName: applicationName);
+
+            if (commandSpec == null)
+            {
+                if (_knownCommandsAvailableAsDotNetTool.Contains(commandName, StringComparer.OrdinalIgnoreCase))
+                {
+                    throw new CommandAvailableAsDotNetToolException(commandName);
+                }
+                else
+                {
+                    throw new CommandUnknownException(commandName);
+                }
+            }
+
+            var command = new Command(commandSpec);
+
+            return command;
+        }
+
+        public static Command Create(CommandSpec commandSpec)
+        {
+            return new Command(commandSpec);
         }
 
         public CommandResult Execute()
         {
+
             Reporter.Verbose.WriteLine(string.Format(
                 LocalizableStrings.RunningFileNameArguments,
                 _process.StartInfo.FileName,
                 _process.StartInfo.Arguments));
-
-            var firstArg = _process.StartInfo.Arguments ?? "";
-            var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "";
-            if (dotnet.Length > 0 && File.Exists(dotnet) && !firstArg.Contains(".dll"))
-            {
-                _process.StartInfo.FileName = dotnet;
-            }
 
             ThrowIfRunning();
 
@@ -56,19 +147,16 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 _process.Start();
 
-                using (new ProcessReaper(_process))
-                {
-                    Reporter.Verbose.WriteLine(string.Format(
-                        LocalizableStrings.ProcessId,
-                        _process.Id));
+                Reporter.Verbose.WriteLine(string.Format(
+                    LocalizableStrings.ProcessId,
+                    _process.Id));
 
-                    var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
-                    var taskErr = _stdErr?.BeginRead(_process.StandardError);
-                    _process.WaitForExit();
+                var taskOut = _stdOut?.BeginRead(_process.StandardOutput);
+                var taskErr = _stdErr?.BeginRead(_process.StandardError);
+                _process.WaitForExit();
 
-                    taskOut?.Wait();
-                    taskErr?.Wait();
-                }
+                taskOut?.Wait();
+                taskErr?.Wait();
             }
 
             var exitCode = _process.ExitCode;
@@ -104,7 +192,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public ICommand EnvironmentVariable(string name, string value)
         {
+#if NET451
+            _process.StartInfo.EnvironmentVariables[name] = value;
+#else
             _process.StartInfo.Environment[name] = value;
+#endif
             return this;
         }
 
@@ -181,6 +273,8 @@ namespace Microsoft.DotNet.Cli.Utils
             _stdErr.ForwardTo(writeLine: handler);
             return this;
         }
+
+        public CommandResolutionStrategy ResolutionStrategy { get; }
 
         public string CommandName => _process.StartInfo.FileName;
 

@@ -16,10 +16,12 @@ namespace Microsoft.DotNet.ToolPackage
 
         DirectoryPath PackageDirectory { get; }
 
-        IReadOnlyList<RestoredCommand> Commands { get; }
+        IReadOnlyList<CommandSettings> Commands { get; }
 
         IEnumerable<string> Warnings { get; }
 
         IReadOnlyList<FilePath> PackagedShims { get; }
+
+        void Uninstall();
     }
 }

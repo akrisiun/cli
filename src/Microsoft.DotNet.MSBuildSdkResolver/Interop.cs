@@ -10,7 +10,14 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 {
     internal static partial class Interop
     {
-        internal static readonly bool RunningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        internal static readonly bool RunningOnWindows =
+#if NET46
+            // Not using RuntimeInformation on NET46 to avoid non-in-box framework API, 
+            // which create deployment problems for the resolver.
+            Path.DirectorySeparatorChar == '\\';
+#else
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
 
         static Interop()
         {
@@ -30,7 +37,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             string architecture = IntPtr.Size == 8 ? "x64" : "x86";
             string dllPath = Path.Combine(basePath, architecture, dllFileName);
 
-            // return value is intentionally ignored as we let the subsequent P/Invokes fail naturally.
+            // return value is intentially ignored as we let the subsequent P/Invokes fail naturally.
             LoadLibraryExW(dllPath, IntPtr.Zero, LOAD_WITH_ALTERED_SEARCH_PATH);
         }
 
@@ -83,7 +90,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
 
         internal static class Unix
         {
-            // Ansi marshaling on Unix is actually UTF8
+            // Ansi marhsaling on Unix is actually UTF8
             private const CharSet UTF8 = CharSet.Ansi;
             private static string PtrToStringUTF8(IntPtr ptr) => Marshal.PtrToStringAnsi(ptr);
 

@@ -1,7 +1,7 @@
 <Project>
 
   <Target Name="GenerateMSBuildExtensions"
-          DependsOnTargets="RestoreMSBuildExtensionsPackages">
+          DependsOnTargets="GenerateBundledVersionsProps;GenerateBundledCliToolsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
 
@@ -72,15 +72,14 @@
 
       <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
-          DotNetExe=$(DotNetExe);
+          CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
           DependencyPackageName=%(ExtensionPackageToRestore.Identity);
           DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </ExtensionRestore>
     </ItemGroup>
-
-    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
 
     <MSBuild
       BuildInParallel="False"

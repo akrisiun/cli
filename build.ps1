@@ -2,6 +2,14 @@
 # "& \"%~dp0run-build.ps1\" %*; exit $LastExitCode;"
 # .\run-build.ps1 -InitTools
 
+Write-Host "OS: " $PSVersionTable.Platform - $PSVersionTable.OS
+
+if ($PSVersionTable.Platform -eq "Unix") {
+   # todo DARWIN
+   cp bin/osx/* bin/obj
+   ls bin/obj
+}
+
 .dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:restore
 .dotnet/dotnet msbuild build.proj /v:d /t:restore
 

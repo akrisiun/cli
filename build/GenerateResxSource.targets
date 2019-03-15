@@ -15,8 +15,10 @@
   </Target>
 
   <Target Name="CustomizeResourceNames"
-          BeforeTargets="PrepareResourceNames;GatherXlf"
           >
+          <!-- 
+          BeforeTargets="PrepareResourceNames"
+          ;GatherXlf -->
     <ItemGroup>
       <EmbeddedResource Condition="'%(EmbeddedResource.Namespace)' != ''">
         <ManifestResourceName>%(EmbeddedResource.Namespace).%(EmbeddedResource.Filename)</ManifestResourceName>

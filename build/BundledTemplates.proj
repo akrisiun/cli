@@ -8,9 +8,14 @@
                             GetTemplateItemsToCopy"
           Inputs="@(TemplateContent)"
           Outputs="@(TemplateContent->'$(TemplateLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')">
-    <Copy SourceFiles="@(TemplateContent)"
+
+    <Message Text="Try copy template $(TemplateFillInPackageName) from $(TemplateNuPkgPath) to $(TemplateLayoutDirectory)."
+             Importance="High" />
+    <!--  build\BundledTemplates.proj
+    .dotnet/dotnet msbuild build\BundledTemplates.proj /t:CopyTemplateToOutput
+          <Copy SourceFiles="@(TemplateContent)"
           DestinationFiles="@(TemplateContent->'$(TemplateLayoutDirectory)/%(RecursiveDir)%(FileName)%(Extension)')" />
-    
+    -->
     <Message Text="Copied template $(TemplateFillInPackageName) from $(TemplateNuPkgPath) to $(TemplateLayoutDirectory)."
              Importance="High" />
   </Target>

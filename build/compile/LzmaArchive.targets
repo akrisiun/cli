@@ -13,11 +13,16 @@
             Inputs="$(IntermediateArchive)"
             Outputs="$(FinalArchive)"
             Condition=" '$(IncludeNuGetPackageArchive)' == 'true' ">
+            
+      <Message Importance="High"
+		   Text="DownloadFile Uri=$(NugetPackagesArchiveBlobUrl)$(CoreSetupBlobAccessTokenParam)" /> 
+      <!--  
       <DownloadFile Uri="$(NugetPackagesArchiveBlobUrl)$(CoreSetupBlobAccessTokenParam)"
                     DestinationPath="$(IntermediateArchive)"
                     ContinueOnError="WarnAndContinue" />
 
       <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(FinalArchive)" />
       <Copy SourceFiles="$(IntermediateArchive)" DestinationFiles="$(PackagesArchive)" />
+      -->
     </Target>
 </Project>

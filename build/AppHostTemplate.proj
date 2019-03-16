@@ -3,7 +3,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
 
   <PropertyGroup>
-    <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))">.exe</NativeExecutableExtension>
+    <NativeExecutableExtension Condition=" $(Rid.StartsWith('win'))"
+      >.exe</NativeExecutableExtension>
     <AppHostExecutableName>AppHost$(NativeExecutableExtension)</AppHostExecutableName>
   </PropertyGroup>
 
@@ -11,7 +12,7 @@
           Condition="!Exists('$(AppHostTemplatePath)/$(AppHostExecutableName)')"
           DependsOnTargets="EnsureAppHostPackageRestored">
 
-    <Message Text="Restore $(TemplateFillInPackageName) from $(AppHostTemplatePath) to $(AppHostTemplateRestoreAdditionalParameters)."
+    <Message Text="$(OSName)|$(Rid) : Restore $(TemplateFillInPackageName) from $(AppHostTemplatePath) to $(AppHostTemplateRestoreAdditionalParameters)."
              Importance="High" />
 
     <ItemGroup>

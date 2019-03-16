@@ -5,14 +5,17 @@
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
-    <!---->
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
 
-    <LibDir>c:\bin\dotc</LibDir>
+    <!-- -->
+    <LibDir>~/bin/dotc</LibDir>
+    <LibDir Condition=" '$(OS)' != 'Windows_NT' ">c:\bin\dotc</LibDir>
+    <EnableXlfLocalization>false</EnableXlfLocalization>
+    <XlfLanguages>en</XlfLanguages>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />

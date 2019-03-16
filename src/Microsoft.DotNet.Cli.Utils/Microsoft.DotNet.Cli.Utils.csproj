@@ -8,10 +8,15 @@
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    
+    <EnableXlfLocalization>false</EnableXlfLocalization>
+    <XlfLanguages>en</XlfLanguages>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <EmbeddedResource Update="**\*.resx" />
+     <!-- GenerateSource="true" 
+     -->
   </ItemGroup>
 
   <ItemGroup>

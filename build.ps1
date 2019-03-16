@@ -27,7 +27,7 @@ if ($PSVersionTable.Platform -eq "Unix") {
 .dotnet/dotnet restore build/sdks
 .dotnet/dotnet restore build/templates
 
-.dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:build
+.dotnet/dotnet build build_projects/dotnet-cli-build/dotnet-cli-build.csproj   -o ./build_projects/dotnet-cli-build/bin/
 .dotnet/dotnet msbuild src/redist/redist.csproj /v:m /t:publish
 
 # fails Download:

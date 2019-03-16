@@ -10,10 +10,15 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+  
+    <EnableXlfLocalization>false</EnableXlfLocalization>
+    <XlfLanguages>en</XlfLanguages>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
+    <EmbeddedResource Update="**\*.resx" />
+     <!-- GenerateSource="true" 
+     -->
   </ItemGroup>
 
   <ItemGroup>

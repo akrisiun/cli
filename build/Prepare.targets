@@ -30,7 +30,9 @@
 
   <Target Name="SetTelemetryProfile"
           DependsOnTargets="BuildDotnetCliBuildFramework" >
+    <!--
     <SetEnvVar Name="DOTNET_CLI_TELEMETRY_PROFILE" Value="$(DOTNET_CLI_TELEMETRY_PROFILE);https://github.com/dotnet/cli;$(CommitHash)" />
+    -->
   </Target>
 
   <Target Name="DownloadHostAndSharedFxArtifacts">

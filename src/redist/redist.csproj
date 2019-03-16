@@ -314,11 +314,12 @@
     </ItemGroup>
 
     <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
+    <!-- 
     <Chmod Condition=" '$(OSName)' != 'win' "
            Glob="$(CrossgenPath)"
            Mode="u+x" />
 
-    <!-- Crossgen does not support generating symbols on Mac  -->
+    Crossgen does not support generating symbols on Mac  -->
     <PropertyGroup Condition="'$(CreateCrossgenSymbols)' == ''">
       <CreateCrossgenSymbols>false</CreateCrossgenSymbols>
       <CreateCrossgenSymbols Condition="'$(OSName)' == 'osx'">false</CreateCrossgenSymbols>

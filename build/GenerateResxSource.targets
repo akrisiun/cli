@@ -34,9 +34,11 @@
           Inputs="@(EmbeddedResourceSG)"
           Outputs="%(EmbeddedResourceSG.SourceOutputPath)"
           >
+          <!--
     <GenerateResxSource ResxFile="%(EmbeddedResourceSG.FullPath)"
                         ResourceName="%(EmbeddedResourceSG.ManifestResourceName)" 
                         SourceOutputPath="%(EmbeddedResourceSG.SourceOutputPath)" />
+                        -->
   </Target>
 
   <Target Name="GetEmbeddedResourcesWithSourceGeneration">

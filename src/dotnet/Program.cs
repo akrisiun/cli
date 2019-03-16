@@ -81,7 +81,9 @@ namespace Microsoft.DotNet.Cli
             }
         }
 
-        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient = null)
+        public static int ProcessArgs(string[] args) => ProcessArgs(args, null);
+        
+        internal static int ProcessArgs(string[] args, ITelemetry telemetryClient) // = null)
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 

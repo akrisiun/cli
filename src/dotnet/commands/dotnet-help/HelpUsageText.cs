@@ -1,5 +1,5 @@
 ﻿using Microsoft.DotNet.Tools;
-using Microsoft.DotNet.Tools.Help;
+using LocalizableStrings = Microsoft.DotNet.Tools.Help.LocalizableStrings;
 
 internal static class HelpUsageText
 {

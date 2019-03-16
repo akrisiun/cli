@@ -5,9 +5,9 @@ using System.Resources;
 
 namespace Microsoft.DotNet.Cli.xlf.LocalizableStrings
 {
-    internal static class xlf
+    internal static class _xlf
     {
         internal static CultureInfo Culture { get; set; }
-        internal static ResourceManager ResourceManager { get; } = new ResourceManager("Microsoft.DotNet.Cli.xlf.LocalizableStrings.xlf", typeof(xlf).GetTypeInfo().Assembly);
+        internal static ResourceManager ResourceManager { get; } = new ResourceManager("Microsoft.DotNet.Cli.xlf.LocalizableStrings.xlf", typeof(_xlf).GetTypeInfo().Assembly);
     }
 }

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Resources;
 
-namespace Microsoft.DotNet.Cli.CommandLine
+namespace Microsoft.DotNet.Cli.CommandLine // Microsoft.DotNet.Tools.CommandLine
 {
     internal static class LocalizableStrings
     {

@@ -22,7 +22,8 @@ namespace Microsoft.DotNet.Cli
 
         private static Option[] FullRestoreOptions()
         {
-            var fullRestoreOptions = AddImplicitRestoreOptions(new Option[] { CommonOptions.HelpOption() }, true, true);
+            var fullRestoreOptions = AddImplicitRestoreOptions(
+                new Option[] { CommonOptions.HelpOption() }, true, true);
 
             return fullRestoreOptions.Concat(
                 new Option[] {

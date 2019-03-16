@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Resources;
 
-namespace Microsoft.DotNet.Cli.xlf.CommonLocalizableStrings
+namespace Microsoft.DotNet.Tools // Cli.xlf.CommonLocalizableStrings
 {
     internal static class xlf
     {

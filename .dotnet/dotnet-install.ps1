@@ -2,6 +2,7 @@
 # Copyright (c) .NET Foundation and contributors. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
+# ./dotnet-install -Version 2.0.0-preview2-006120 -InstallDir .
 
 <#
 .SYNOPSIS
@@ -157,8 +158,10 @@ function Get-Machine-Architecture() {
 
 function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
     Say-Invocation $MyInvocation
-    if ($PSVersionTable.Platform -eq "Unix") {
-        return "x64"
+
+    return "x64"
+    /*
+    if ($env:windir -eq $null -And $PSVersionTable.Platform -eq "Unix") {
     }
 
     switch ($Architecture.ToLower()) {
@@ -169,6 +172,7 @@ function Get-CLIArchitecture-From-Architecture([string]$Architecture) {
         { $_ -eq "arm64" } { return "arm64" }
         default { throw "Architecture not supported. If you think this is a bug, please report it at https://github.com/dotnet/cli/issues" }
     }
+    */
 }
 
 function Get-Version-Info-From-Version-Text([string]$VersionText) {
@@ -549,7 +553,7 @@ if ($isAssetInstalled) {
 
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
-if ($PSVersionTable.Platform -eq "Unix") {
+if ($env:windir -eq $null -And $PSVersionTable.Platform -eq "Unix") {
   # OK
 } else {
   # Windows
@@ -567,7 +571,7 @@ Say-Verbose "Zip path: $ZipPath"
 $DownloadFailed = $false
 Say "Downloading link: $DownloadLink"
 try {
-    DownloadFile -Uri $DownloadLink -OutPath $ZipPath
+        DownloadFile -Uri $DownloadLink -OutPath $ZipPath
 }
 catch {
     Say "Cannot download: $DownloadLink"

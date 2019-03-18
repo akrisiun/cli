@@ -16,16 +16,19 @@
     <LibDir Condition=" '$(OS)' == 'Windows_NT' ">c:\bin\dotc\sdk\2.1.601-dev1</LibDir>
     <EnableXlfLocalization>false</EnableXlfLocalization>
     <XlfLanguages>en</XlfLanguages>
+	<EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
     <Compile Include="commands\dotnet-new\*.cs" />
     <EmbeddedResource Include="commands\dotnet-new\*.zip" />
     
-    <EmbeddedResource Remove="**\*.resx" />
+    <EmbeddedResource Include="**\*.resx" />
     <!--
     <Folder Include="commands\dotnet-migrate\xlf" />
+	
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" /> 
+	-->
 
     <EmbeddedResource Update="*.resx" Namespace="Microsoft.DotNet.Tools" />
     <EmbeddedResource Update="BuildServer\*.resx" Namespace="Microsoft.DotNet.BuildServer" />
@@ -57,7 +60,7 @@
     <EmbeddedResource Update="**\dotnet-tool\uninstall\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Uninstall" />
     <EmbeddedResource Update="**\dotnet-tool\install\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Install" />
     <EmbeddedResource Update="**\dotnet-tool\update\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Update" />
-    -->
+    
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Microsoft.DotNet.Configurer/Microsoft.DotNet.Configurer.csproj" />

@@ -42,7 +42,8 @@
     <PropertyGroup>
       <ExtraRestoreArgs>$(ExtraRestoreArgs) /p:GeneratePropsFile=$(GeneratePropsFile)</ExtraRestoreArgs>
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
-	    <dotnet>$(RepoRoot).dotnet/dotnet$(ExeExtension)</dotnet>
+	  <dotnet>$(RepoRoot).dotnet/dotnet$(ExeExtension)</dotnet>
+	  <dotnet Condition="'$(OS)' == 'Windows_NT'">dotc</dotnet>
     </PropertyGroup>
 
     <!-- ../../build.proj -->

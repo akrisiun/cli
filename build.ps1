@@ -1,40 +1,46 @@
 
-# "& \"%~dp0run-build.ps1\" %*; exit $LastExitCode;"
-# .\run-build.ps1 -InitTools
+$Configuration="Debug"
+$ArchitectureParam="/p:Architecture=x64"
+$ConfigurationParam="-configuration $Configuration"
 
-Write-Host "OS: " $PSVersionTable.Platform - $PSVersionTable.OS
+# ./eng/common/build.ps1 -restore
+# ./eng/common/build.ps1 -build $ConfigurationParam $ArchitectureParam
 
-if ($PSVersionTable.Platform -eq "Unix") {
-   # todo DARWIN
-   cp bin/osx/* bin/obj
-   ls bin/obj
-}
+# .dotnet/dotnet build src/dotnet -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0
 
-.dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:restore
-.dotnet/dotnet msbuild build.proj /v:d /t:restore
+# ./eng/common/build.ps1 -build /p:Architecture=x64
+$dotc = "c:\bin\dotc\dotnet.exe"
 
-# 2.1.403
-# "sdk": {
-#        "version": "3.0.100-preview3-010431"
+dotc restore build.proj -v n /p:GeneratePropsFile=true
+dotc restore src/dotnet -f netcoreapp2.1
 
-.dotnet/dotnet msbuild build_projects/dotnet-cli-build/dotnet-cli-build.csproj  /t:build
-# @REM .dotnet/dotnet msbuild build.proj /v:d /p:Architecture=x64 /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles
+dotc restore build/RestoreDependency.proj
+dotc restore build\sdks\sdks.csproj 
+dotc restore src/redist
 
-.dotnet/dotnet msbuild build.proj /v:n /t:BuildDotnetCliBuildFramework
-.dotnet/dotnet msbuild build.proj /v:n /t:RestoreToolsPackages
-.dotnet/dotnet restore src/redist
+dotc restore build/BundledDotnetTools.proj
+dotc restore build/BundledTemplates.projs
+dotc build build_projects\shared-build-targets-utils
+dotc build build_projects\dotnet-cli-build
+dotc build build_projects\dotnet-cli-build			 -o build_projects\dotnet-cli-build\bin
+dotc build build_projects\shared-build-targets-utils -o build_projects\dotnet-cli-build\bin
 
-.dotnet/dotnet restore build/sdks
-.dotnet/dotnet restore build/templates
+dotc msbuild build\RestoreDependency.proj /t:EnsureDependencyRestored
 
-.dotnet/dotnet build build_projects/dotnet-cli-build/dotnet-cli-build.csproj   -o ./build_projects/dotnet-cli-build/bin/
-.dotnet/dotnet msbuild src/redist/redist.csproj /v:m /t:publish
+dotc build src/dotnet
+dotc publish src/dotnet -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0  -f netcoreapp3.0
+dotc publish src/Microsoft.DotNet.Configurer  -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0
+dotc publish src/Microsoft.DotNet.InternalAbstractions  -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0
+dotc publish src/Microsoft.DotNet.Cli.Utils  -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0 -f netcoreapp3.0
+dotc publish src/Microsoft.DotNet.Cli.Sln.Internal -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0
 
-# fails Download:
-# build\Prepare.targets
-# build\compile\LzmaArchive.targets
-# nuget install microsoft.dotnet.common.itemtemplates -version 1.0.2-beta3 -o .nuget/packages
-# NU5000: Package 'Microsoft.DotNet.Common.ItemTemplates 1.0.2-beta3' has a package type 'Template' that is not supported by project :-(
-# nuget install microsoft.dotnet.common.projecttemplates -o .nuget/packages
+# .dotnet/dotnet.exe msbuild src/dotnet/dotnet.csproj /t:build /v:d
+dotc restore DotNet.Cli.sln
+dotc build src/redist
+dotc publish src/redist -f netcoreapp2.1
 
-# .dotnet/dotnet msbuild build.proj /v:n
+# dotc publish src/redist -o .\artifacts\bin\dotnet\Debug\netcoreapp3.0
+
+# Success?
+# 2.0.601-dev1
+dotc .\bin\2\win-x64\dotnet\sdk\2.1.601-dev1-009587\dotnet.dll --info

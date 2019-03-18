@@ -10,7 +10,10 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
+	<!-- SdkOutputDirectory -->
     <PublishDir>$(SdkOutputDirectory)</PublishDir>
+	<RedistDirectory>$(OutputDirectory)/sdk/$(NugetVersion)</RedistDirectory>
+	
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
 
@@ -64,13 +67,18 @@
   <Target Name="PublishVersionFile"
           BeforeTargets="Publish">
 
-    <WriteLinesToFile File="$(PublishDir)/.version"
+	<Message Importance="High"
+		  Text="PublishVersionFile= $(RedistDirectory).version" />
+		  
+    <WriteLinesToFile File="$(RedistDirectory).version"
                       Lines="$(CommitHash);$(SdkVersion);$(Rid)"
                       Overwrite="true" />
   </Target>
 
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
+	<Message Importance="High"
+		  Text="PublishRoslyn=      $(RedistDirectory).version" />
 
     <ItemGroup>
       <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
@@ -88,30 +96,37 @@
     <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
                    ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" MSBuildArgs="/p:PublishDir=$(FSharpDirectory)" />
--->                   
+-->
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
           AfterTargets="Publish">
-    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+    
+	<Message Importance="High"
+		  Text="GenerateCliRuntimeConfigurationFiles| RedistDirectory=$(RedistDirectory) |> %(BundledToolProjects.Identity)" />
+<!--
+	<RemoveAssetFromDepsPackages DepsFile="$(RedistDirectory)/$(TargetName).deps.json"
                                  SectionName="runtime"
                                  AssetPath="%(BundledToolProjects.Identity).dll" />
 
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).deps.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).deps.json" />
+    <Copy SourceFiles="$(RedistDirectory)$(TargetName).deps.json"
+          DestinationFiles="$(RedistDirectory)%(BundledTools.Identity).deps.json" />
 
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).runtimeconfig.json" />
+    <Copy SourceFiles="$(RedistDirectory)$(TargetName).runtimeconfig.json"
+          DestinationFiles="$(RedistDirectory)%(BundledTools.Identity).runtimeconfig.json" />
 
-    <Delete Files="$(PublishDir)/$(TargetName).deps.json;
-                   $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
-                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
-	<!--
+    <Delete Files="$(RedistDirectory)/$(TargetName).deps.json;
+                   $(RedistDirectory)/$(TargetName).runtimeconfig.json;
+                   $(RedistDirectory)/%(BundledToolProjects.Identity).dll;
+                   $(RedistDirectory)/%(BundledToolProjects.Identity).pdb" />
+
+	<Message Importance="High"
+		  Text="ChangeEntryPoint DepsFile=$(RedistDirectory)%(BundledTools.Identity).deps.json NewName=%(BundledTools.Identity).deps.json" />
+		  
     <ChangeEntryPointLibraryName
-          DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
+          DepsFile="$(RedistDirectory)%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
-		  -->
+-->		  
   </Target>
 
   <Target Name="PublishMSBuildExtensions"
@@ -128,7 +143,7 @@
             DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
 
       <PropertyGroup>
-        <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
+        <MSBuildTargetsDirectory>$(RedistDirectory)runtimes/any/native</MSBuildTargetsDirectory>
       </PropertyGroup>
 
       <ItemGroup>
@@ -141,9 +156,8 @@
       </ItemGroup>
 
       <Move SourceFiles="@(NuPkgContentForMSBuildExtensions)"
-            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(PublishDir)/%(RecursiveDir)%(Filename)%(Extension)')" />
-
-      <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
+            DestinationFiles="@(NuPkgContentForMSBuildExtensions->'$(RedistDirectory)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)$(TargetName).deps.json"
                                    SectionName="runtimeTargets"
                                    AssetPath="%(NuPkgContentForMSBuildExtensionsRelativePaths.Identity)" />
   </Target>
@@ -153,7 +167,7 @@
   <Target Name="RemoveMSDiaTypeLib"
           AfterTargets="Publish"
           Condition="'$(OSName)' != 'win'">
-    <Delete Files="$(PublishDir)/TestHost/msdia140typelib_clr0200.dll" />
+    <Delete Files="$(RedistDirectory)TestHost/msdia140typelib_clr0200.dll" />
   </Target>
 
   <Target Name="PublishSdks"
@@ -264,31 +278,31 @@
           Condition=" '$(DISABLE_CROSSGEN)' == '' And !$(Architecture.StartsWith('arm')) "
           AfterTargets="PublishSdks">
     <ItemGroup>
-      <RoslynFiles Include="$(PublishDir)Roslyn\bincore\**\*" />
-      <FSharpFiles Include="$(PublishDir)FSharp\**\*" Exclude="$(PublishDir)FSharp\FSharp.Build.dll" />
-      <RemainingFiles Include="$(PublishDir)**\*" Exclude="@(RoslynFiles);@(FSharpFiles)" />
+      <RoslynFiles Include="$(RedistDirectory)Roslyn\bincore\**\*" />
+      <FSharpFiles Include="$(RedistDirectory)FSharp\**\*" Exclude="$(RedistDirectory)FSharp\FSharp.Build.dll" />
+      <RemainingFiles Include="$(RedistDirectory)**\*" Exclude="@(RoslynFiles);@(FSharpFiles)" />
 
       <!-- Removing Full CLR built TestHost assemblies from getting Crossgen as it is throwing error -->
-      <RemainingFiles Remove="$(PublishDir)TestHost*\**\*" />
-      <RemainingFiles Remove="$(PublishDir)Sdks\**\*" />
-      <RemainingFiles Remove="$(PublishDir)**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
+      <RemainingFiles Remove="$(RedistDirectory)TestHost*\**\*" />
+      <RemainingFiles Remove="$(RedistDirectory)Sdks\**\*" />
+      <RemainingFiles Remove="$(RedistDirectory)**\Microsoft.TestPlatform.Extensions.EventLogCollector.dll" />
 
       <!-- Add back the .NET Core assemblies in the Sdks folder -->
-      <RemainingFiles Include="$(PublishDir)Sdks\Microsoft.NET.Sdk\tools\netcoreapp2.0\**\*" />
-      <RemainingFiles Include="$(PublishDir)Sdks\NuGet.Build.Tasks.Pack\CoreCLR\**\*" />
+      <RemainingFiles Include="$(RedistDirectory)Sdks\Microsoft.NET.Sdk\tools\netcoreapp2.0\**\*" />
+      <RemainingFiles Include="$(RedistDirectory)Sdks\NuGet.Build.Tasks.Pack\CoreCLR\**\*" />
 
       <!-- Don't try to CrossGen .NET Framework support assemblies for .NET Standard -->
-      <RemainingFiles Remove="$(PublishDir)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
+      <RemainingFiles Remove="$(RedistDirectory)Microsoft\Microsoft.NET.Build.Extensions\net*\**\*" />
 
       <!-- Don't crossgen satellite assemblies -->
-      <RoslynFiles Remove="$(PublishDir)Roslyn\bincore\**\*.resources.dll" />
-      <FSharpFiles Remove="$(PublishDir)FSharp\**\*.resources.dll" />
-      <RemainingFiles Remove="$(PublishDir)**\*.resources.dll" />
+      <RoslynFiles Remove="$(RedistDirectory)Roslyn\bincore\**\*.resources.dll" />
+      <FSharpFiles Remove="$(RedistDirectory)FSharp\**\*.resources.dll" />
+      <RemainingFiles Remove="$(RedistDirectory)**\*.resources.dll" />
 
       <DiasymReaderPath Include="$(SharedFrameworkNameVersionPath)/Microsoft.DiaSymReader.Native.*.dll" />
 
       <!-- MSBuild includes reference assemblies to compile in-memory tasks. Don't try to crossgen. -->
-      <RemainingFiles Remove="$(PublishDir)ref\*.dll" />
+      <RemainingFiles Remove="$(RedistDirectory)ref\*.dll" />
     </ItemGroup>
 
     <AddMetadataIsPE Items="@(RoslynFiles)">
@@ -311,7 +325,7 @@
       <RemainingFolders Include="@(RemainingTargets-&gt;DirectoryName()-&gt;Distinct())" />
 
       <!-- FSharp.Build.dll causes the FSharp folder to be included. Remove it, as we don't want other FSharp dlls being included in the crossgen. -->
-      <RemainingFolders Remove="$(PublishDir)FSharp\**\*" />
+      <RemainingFolders Remove="$(RedistDirectory)FSharp\**\*" />
     </ItemGroup>
 
     <!-- Ensure crossgen tool is executable.  See https://github.com/NuGet/Home/issues/4424 -->
@@ -373,8 +387,8 @@
   <Target Name="SeparateSymbolsFromPublishDir"
           AfterTargets="CrossgenPublishDir">
     <ItemGroup>
-      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
-      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
+      <PdbsToMove Include="$(RedistDirectory)**/*.pdb" />
+      <PdbsToMove Include="$(RedistDirectory)**/*.ni.*.map" />
     </ItemGroup>
 
     <Move SourceFiles="@(PdbsToMove)"
@@ -402,7 +416,7 @@
           BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
-      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
+      <VSTestRuntimeConfigPath>$(RedistDirectory)vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
       <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>

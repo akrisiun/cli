@@ -20,8 +20,14 @@
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:RestorePackagesPath=$(DotnetToolsLayoutDirectory)</DotnetToolsRestoreAdditionalParameters>
     </PropertyGroup>
 
+	<Message Text="NO: DotNetRestore ToolPath=$(PreviousStageDirectory)"
+		Importance="High" />
+	<Message Text="NO: DotNetRestore ProjectPath=$(MSBuildThisFileDirectory)/templates/templates.csproj" 
+		Importance="High" />
+	<!--
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/templates/templates.csproj"
                    AdditionalParameters="$(DotnetToolsRestoreAdditionalParameters)" />
+				   -->
   </Target>
 </Project>

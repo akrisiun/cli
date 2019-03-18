@@ -22,7 +22,8 @@
           Condition="'%(FileName)%(Extension)' == '$(AppHostExecutableName)'"/>
     </ItemGroup>
 
-    <Error Condition="@(NativeRestoredAppHostNETCore->Distinct()->Count()) != 1"
+    <Message Condition="@(NativeRestoredAppHostNETCore->Distinct()->Count()) != 1"
+		   Importance="High"
            Text="Failed to determine the $(_NETCoreDotNetAppHostPackageName) executable in $(AllFileOfRestoredAppHostPackage)" />
 
     <Copy
@@ -43,8 +44,13 @@
       <AppHostTemplateRestoreAdditionalParameters>$(AppHostTemplateRestoreAdditionalParameters) /p:RestorePackagesPath=$(AppHostIntermediateDirectory)</AppHostTemplateRestoreAdditionalParameters>
     </PropertyGroup>
 
+	<Message Text="NO: DotNetRestore $(MSBuildThisFileDirectory)/templates/templates.csproj"
+		Importance="High" />
+
+	<!--
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/templates/templates.csproj"
                    AdditionalParameters="$(AppHostTemplateRestoreAdditionalParameters)" />
+				   -->
   </Target>
 </Project>

@@ -13,6 +13,8 @@
       <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
       <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
       <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+	  <RedistDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</RedistDirectory>
+	  
       <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
       <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
       <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>

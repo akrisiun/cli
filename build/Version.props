@@ -3,7 +3,7 @@
     <VersionMajor>2</VersionMajor>
     <VersionMinor>1</VersionMinor>
     <VersionPatch>601</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview</ReleaseSuffix>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">dev1</ReleaseSuffix>
 
     <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
     <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>

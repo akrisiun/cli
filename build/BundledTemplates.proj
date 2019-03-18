@@ -29,11 +29,11 @@
   <Target Name="EnsureTemplateRestored"
           Condition="!Exists('$(TemplateNuPkgPath)/$(TemplateFillInPackageName.ToLower()).nuspec')">
     <Message 
-        Text="$(OS): dotnet restore $(MSBuildThisFileDirectory)templates/templates.csproj" />
+        Text="$(OS): dotc restore $(MSBuildThisFileDirectory)templates/templates.csproj" />
+<!--          
     <Exec 
         Condition=" '$(OS)' == 'Windows_NT' "
-        Command="dotnet restore $(MSBuildThisFileDirectory)templates/templates.csproj" />
-<!--          
+        Command="dotc restore $(MSBuildThisFileDirectory)templates/templates.csproj /p:TargetFramework=netcoreapp1.0" />
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="$(MSBuildThisFileDirectory)/templates/templates.csproj"
                    AdditionalParameters="/p:TargetFramework=netcoreapp1.0 /p:TemplateFillInPackageName=$(TemplateFillInPackageName) /p:TemplateFillInPackageVersion=$(TemplateFillInPackageVersion)" />

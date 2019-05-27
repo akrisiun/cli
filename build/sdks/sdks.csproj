@@ -5,11 +5,15 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp1.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <MicrosoftNETSdkPackageVersion2>3.0.100-preview.18551.1</MicrosoftNETSdkPackageVersion2>
+    <MicrosoftNETSdkRazorPackageVersion>3.0.100-preview.18551.1</MicrosoftNETSdkRazorPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
-    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion)" />
+    <PackageReference Include="Microsoft.NET.Build.Extensions" Version="$(MicrosoftNETSdkPackageVersion2)" />
+    <PackageReference Condition="'$(DependencyPackageName)' != 'Microsoft.NET.Build.Extensions'" 
+                      Include="$(DependencyPackageName)" Version="$(DependencyPackageVersion)" />
+    <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk" Version="$(MicrosoftNETSdkPackageVersion2)" />
     <PackageReference Condition="'$(DependencyPackageName)' == 'Microsoft.NET.Sdk.Web'" Include="Microsoft.NET.Sdk.Razor" Version="$(MicrosoftNETSdkRazorPackageVersion)" />
   </ItemGroup>
 

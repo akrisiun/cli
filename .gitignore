@@ -75,7 +75,6 @@ bld/
 .vs/
 
 # Visual Studio Code cache/options directory
-.vscode/
 
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
@@ -203,15 +202,6 @@ DocProject/Help/html
 *.pubxml
 *.publishproj
 
-# NuGet Packages
-*.nupkg
-# The packages folder can be ignored because of Package Restore
-**/packages/*
-# except build/, which is used as an MSBuild target.
-!**/packages/build/
-# Uncomment if necessary however generally it will be regenerated when needed
-#!**/packages/repositories.config
-
 # Windows Azure Build Output
 csx/
 *.build.csdef
@@ -292,7 +282,6 @@ _Pvt_Extensions
 
 # Exceptions
 # Build Scripts
-!scripts/build/
 test/PackagedCommands/Consumers/*/project.json
 
 # Vim swp files
@@ -300,9 +289,48 @@ test/PackagedCommands/Consumers/*/project.json
 *.*~
 
 # VS generated files
-launchSettings.json
-
 # user files used in tests
 !TestAssets/TestProjects/TestAppWithLibrary/TestLibrary/TestLibrary.xproj.user
 !TestAssets/TestProjects/TestAppWithLibrary/TestApp/TestApp.xproj.user
 !TestAssets/TestProjects/PJTestAppSimple/PJTestAppSimple.xproj.user
+
+lib/dotnet/
+lib/lib.zip
+lib/sdk/
+lib/
+
+# NuGet Packages
+*.nupkg
+# The packages folder can be ignored because of Package Restore
+# **/packages/*
+**/packages/*.dll
+**/packages/*.exe 
+**/*.dll
+**/*.exe
+
+# except build/, which is used as an MSBuild target.
+!**/packages/build/
+# Uncomment if necessary however generally it will be regenerated when needed
+!**/packages/repositories.config
+
+*.dev.json
+*.exe
+**/*.bak
+bin/obj/HostInfo.props
+
+vendor/msbuild/
+vendor/dotnet/
+vendor/toolset/
+vendor/core-sdk/
+vendor/app/
+vendor/DotNetCorePlugins/
+vendor/corefx/
+vendor/core-setup/
+vendor/AspNetCore/
+vendor/websdk/
+vendor/nuget-client/src/NuGet.Clients/NuGet.VisualStudio.*/
+vendor/nuget-client/src/NuGet.Clients/NuGet.VisualStudio/
+vendor/nuget-client/src/NuGet.Clients/NuGetConsole.Host.*/
+vendor/nuget-client/
+*.zip
+src/**/.vscode/

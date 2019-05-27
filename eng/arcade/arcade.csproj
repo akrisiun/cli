@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+	
+	<SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+	<TargetLatestAspNetCoreRuntimePatch Condition="'' == ''">true</TargetLatestAspNetCoreRuntimePatch>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+	<!--
+    dotnet restore -p:TargetLatestRuntimePatch=true
+	<PackageReference Include="Microsoft.NETCore.App" Version="2.1.9" /> -->
+	<PackageReference Include="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-dev" />
+  </ItemGroup>
+
+</Project>
